@@ -1,7 +1,9 @@
 import http from 'http';
 import { Server } from 'socket.io';
+import 'dotenv/config';
 import app from './app.js';
 import { registerSockets } from './sockets/index.js';
+import { socketAuthMiddleware } from './sockets/auth.middleware.js';
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
@@ -13,13 +15,13 @@ const io = new Server(server, {
 
 
 const PORT = process.env.PORT || 5000;
-
-io.on('connection', (socket) => {
-    console.log(`New client connected: ${socket.id}`);
-
-    socket.on('disconnect', () => {
-        console.log(`Client disconnected: ${socket.id}`);
-    });
+io.use((socket, next) => {
+    try {
+        socketAuthMiddleware(socket);
+        next();
+    } catch {
+        next(new Error('UNAUTHORIZED'));
+    }
 });
 registerSockets(io);
 
