@@ -3,8 +3,12 @@ import { registerRoomHandlers } from './room.socket.js';
 import { registerEditorHandlers } from './editor.socket.js';
 import { registerPresenceHandlers } from './presence.socket.js';
 
-export function registerSockets(io: Server) {
-  registerRoomHandlers(io);
-  registerEditorHandlers(io);
-  registerPresenceHandlers(io);
-}
+export const registerSockets = (io: Server) => {
+  const registerAll = () => {
+    registerRoomHandlers(io);
+    registerEditorHandlers(io);
+    registerPresenceHandlers(io);
+  };
+
+  registerAll();
+};

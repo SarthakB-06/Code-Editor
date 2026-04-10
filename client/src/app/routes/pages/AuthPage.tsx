@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { login, setAccessToken, signup } from '../../../features/auth/authService';
 import { disconnectSocket } from '../../../features/collaboration/socketService';
 
-export default function AuthPage() {
+const AuthPage = () => {
   const navigate = useNavigate();
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
@@ -12,6 +12,30 @@ export default function AuthPage() {
   const [name, setName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const setLoginMode = () => setMode('login');
+  const setSignupMode = () => setMode('signup');
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      const res =
+        mode === 'login'
+          ? await login({ email, password })
+          : await signup({ email, password, name });
+
+      setAccessToken(res.token);
+      disconnectSocket();
+      navigate('/', { replace: true });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Auth failed');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="p-4 max-w-md">
@@ -21,14 +45,14 @@ export default function AuthPage() {
         <button
           type="button"
           className="border rounded px-3 py-2"
-          onClick={() => setMode('login')}
+          onClick={setLoginMode}
         >
           Login
         </button>
         <button
           type="button"
           className="border rounded px-3 py-2"
-          onClick={() => setMode('signup')}
+          onClick={setSignupMode}
         >
           Signup
         </button>
@@ -36,26 +60,7 @@ export default function AuthPage() {
 
       <form
         className="mt-4 flex flex-col gap-2"
-        onSubmit={async (e) => {
-          e.preventDefault();
-          setError(null);
-          setLoading(true);
-
-          try {
-            const res =
-              mode === 'login'
-                ? await login({ email, password })
-                : await signup({ email, password, name });
-
-            setAccessToken(res.token);
-            disconnectSocket();
-            navigate('/', { replace: true });
-          } catch (err) {
-            setError(err instanceof Error ? err.message : 'Auth failed');
-          } finally {
-            setLoading(false);
-          }
-        }}
+        onSubmit={handleSubmit}
       >
         {mode === 'signup' ? (
           <input
@@ -96,4 +101,6 @@ export default function AuthPage() {
       </form>
     </div>
   );
-}
+};
+
+export default AuthPage;

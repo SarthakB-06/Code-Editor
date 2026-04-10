@@ -1,15 +1,28 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-function generateRoomId() {
+const generateRoomId = () => {
     return crypto.randomUUID();
-}
+};
 
-export default function HomePage() {
+const HomePage = () => {
     const navigate = useNavigate();
     const [roomId, setRoomId] = useState('');
 
     const trimmedRoomId = useMemo(() => roomId.trim(), [roomId]);
+
+    const handleCreateRoom = () => {
+        const newRoomId = generateRoomId();
+        navigate(`/room/${newRoomId}`);
+    };
+
+    const handleJoinRoom = () => {
+        navigate(`/room/${trimmedRoomId}`);
+    };
+
+    const handleGoAuth = () => {
+        navigate('/auth');
+    };
 
     return (
         <div className="p-4">
@@ -19,10 +32,7 @@ export default function HomePage() {
                 <button
                     type="button"
                     className="border rounded px-3 py-2"
-                    onClick={() => {
-                        const newRoomId = generateRoomId();
-                        navigate(`/room/${newRoomId}`);
-                    }}
+                    onClick={handleCreateRoom}
                 >
                     Create Room
                 </button>
@@ -38,7 +48,7 @@ export default function HomePage() {
                         type="button"
                         className="border rounded px-3 py-2"
                         disabled={!trimmedRoomId}
-                        onClick={() => navigate(`/room/${trimmedRoomId}`)}
+                        onClick={handleJoinRoom}
                     >
                         Join
                     </button>
@@ -47,11 +57,13 @@ export default function HomePage() {
                 <button
                     type="button"
                     className="border rounded px-3 py-2"
-                    onClick={() => navigate('/auth')}
+                    onClick={handleGoAuth}
                 >
                     Go to Auth
                 </button>
             </div>
         </div>
     );
-}
+};
+
+export default HomePage;

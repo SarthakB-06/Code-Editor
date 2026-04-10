@@ -1,9 +1,10 @@
 import http from 'http';
-import { Server } from 'socket.io';
+import { Server, type Socket } from 'socket.io';
 import 'dotenv/config';
 import app from './app.js';
 import { registerSockets } from './sockets/index.js';
 import { socketAuthMiddleware } from './sockets/auth.middleware.js';
+import { connectDb } from './config/db.js';
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
@@ -15,17 +16,31 @@ const io = new Server(server, {
 
 
 const PORT = process.env.PORT || 5000;
-io.use((socket, next) => {
+
+const authGate = (socket: Socket, next: (err?: Error) => void) => {
     try {
         socketAuthMiddleware(socket);
         next();
     } catch {
         next(new Error('UNAUTHORIZED'));
     }
-});
+};
+
+io.use(authGate);
 registerSockets(io);
 
+const bootstrap = async () => {
+    await connectDb();
+    const onListen = () => {
+        console.log(`Server is listening on port ${PORT}`);
+    };
 
-server.listen(PORT, () => {
-    console.log(`Server is listening on port ${PORT}`);
-});
+    server.listen(PORT, onListen);
+};
+
+const onBootstrapError = (err: unknown) => {
+    console.error('Failed to start server', err);
+    process.exit(1);
+};
+
+bootstrap().catch(onBootstrapError);

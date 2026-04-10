@@ -10,7 +10,7 @@ type User = {
   color?: string;
 };
 
-export default function RoomPage() {
+const RoomPage = () => {
   const { roomId } = useParams();
   const [code, setCode] = useState('// Start coding...\n');
   const [users, setUsers] = useState<User[]>([]);
@@ -24,6 +24,24 @@ export default function RoomPage() {
     if (!roomId) return '';
     return `${window.location.origin}/room/${roomId}`;
   }, [roomId]);
+
+  const handleEditorChange = (value: string | undefined) => {
+    const next = value ?? '';
+    setCode(next);
+
+    if (!roomId) return;
+    if (applyingRemoteRef.current) {
+      applyingRemoteRef.current = false;
+      return;
+    }
+
+    const socket = getSocket();
+
+    if (emitTimerRef.current) window.clearTimeout(emitTimerRef.current);
+    emitTimerRef.current = window.setTimeout(() => {
+      socket.emit('code-change', { roomId, code: next });
+    }, 150);
+  };
 
   useEffect(() => {
     if (!roomId) return;
@@ -121,26 +139,12 @@ export default function RoomPage() {
             theme="vs-dark"
             defaultLanguage="typescript"
             value={code}
-            onChange={(value) => {
-              const next = value ?? '';
-              setCode(next);
-
-              if (!roomId) return;
-              if (applyingRemoteRef.current) {
-                applyingRemoteRef.current = false;
-                return;
-              }
-
-              const socket = getSocket();
-
-              if (emitTimerRef.current) window.clearTimeout(emitTimerRef.current);
-              emitTimerRef.current = window.setTimeout(() => {
-                socket.emit('code-change', { roomId, code: next });
-              }, 150);
-            }}
+            onChange={handleEditorChange}
           />
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default RoomPage;

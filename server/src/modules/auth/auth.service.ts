@@ -19,32 +19,32 @@ export type JwtPayload = {
 const usersByEmail = new Map<string, AuthUser>();
 const usersById = new Map<string, AuthUser>();
 
-function getJwtSecret() {
+const getJwtSecret = () => {
     const secret = process.env.JWT_SECRET;
     if (secret && secret.length > 0) return secret;
     // Dev fallback so the app works out-of-the-box.
     return 'dev-secret-change-me';
-}
+};
 
-export function signAccessToken(payload: JwtPayload) {
+export const signAccessToken = (payload: JwtPayload) => {
     return jwt.sign(payload, getJwtSecret(), {
         algorithm: 'HS256',
         expiresIn: '7d',
     });
-}
+};
 
-export function verifyAccessToken(token: string): JwtPayload {
+export const verifyAccessToken = (token: string): JwtPayload => {
     return jwt.verify(token, getJwtSecret(), {
         algorithms: ['HS256'],
     }) as JwtPayload;
-}
+};
 
-export async function createUser(input: {
+export const createUser = async (input: {
     id: string;
     email: string;
     name: string;
     password: string;
-}): Promise<PublicUser> {
+}): Promise<PublicUser> => {
     const email = input.email.trim().toLowerCase();
     if (usersByEmail.has(email)) {
         throw new Error('EMAIL_ALREADY_EXISTS');
@@ -64,12 +64,12 @@ export async function createUser(input: {
 
     const { passwordHash: _ph, ...publicUser } = user;
     return publicUser;
-}
+};
 
-export async function validateUserLogin(input: {
+export const validateUserLogin = async (input: {
     email: string;
     password: string;
-}): Promise<PublicUser> {
+}): Promise<PublicUser> => {
     const email = input.email.trim().toLowerCase();
     const user = usersByEmail.get(email);
     if (!user) throw new Error('INVALID_CREDENTIALS');
@@ -79,11 +79,11 @@ export async function validateUserLogin(input: {
 
     const { passwordHash: _ph, ...publicUser } = user;
     return publicUser;
-}
+};
 
-export function getUserById(id: string): PublicUser | null {
+export const getUserById = (id: string): PublicUser | null => {
     const user = usersById.get(id);
     if (!user) return null;
     const { passwordHash: _ph, ...publicUser } = user;
     return publicUser;
-}
+};

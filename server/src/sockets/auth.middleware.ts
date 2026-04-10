@@ -7,7 +7,7 @@ type SocketData = {
     user?: User;
 };
 
-export function socketAuthMiddleware(socket: Socket) {
+export const socketAuthMiddleware = (socket: Socket) => {
     const s = socket as Socket & { data: SocketData };
 
     const token =
@@ -26,4 +26,4 @@ export function socketAuthMiddleware(socket: Socket) {
         id: payload.sub,
         name: payload.name || payload.email,
     };
-}
+};

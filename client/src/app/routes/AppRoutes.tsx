@@ -6,13 +6,13 @@ import RoomPage from './pages/RoomPage';
 
 import { getAccessToken } from '../../features/auth/authService';
 
-function RequireAuth() {
+const RequireAuth = () => {
   const token = getAccessToken();
   if (!token) return <Navigate to="/auth" replace />;
   return <Outlet />;
-}
+};
 
-export default function AppRoutes() {
+const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/auth" element={<AuthPage />} />
@@ -23,4 +23,6 @@ export default function AppRoutes() {
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
-}
+};
+
+export default AppRoutes;

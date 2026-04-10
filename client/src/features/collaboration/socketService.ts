@@ -4,7 +4,7 @@ import { getAccessToken } from '../auth/authService';
 
 let socket: Socket | null = null;
 
-export function getSocket(): Socket {
+export const getSocket = (): Socket => {
 	if (socket) return socket;
 
 	const url = import.meta.env.VITE_SERVER_URL ?? 'http://localhost:5000';
@@ -22,9 +22,9 @@ export function getSocket(): Socket {
 	});
 
 	return socket;
-}
+};
 
-export function disconnectSocket() {
+export const disconnectSocket = () => {
 	socket?.disconnect();
 	socket = null;
-}
+};

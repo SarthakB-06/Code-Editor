@@ -11,23 +11,24 @@ export type AuthResponse = {
 
 const TOKEN_KEY = 'accessToken';
 
-function getApiUrl() {
+
+const getApiUrl = () => {
 	return import.meta.env.VITE_API_URL ?? 'http://localhost:5000';
-}
+};
 
-export function getAccessToken() {
+export const getAccessToken = () => {
 	return localStorage.getItem(TOKEN_KEY);
-}
+};
 
-export function setAccessToken(token: string) {
+export const setAccessToken = (token: string) => {
 	localStorage.setItem(TOKEN_KEY, token);
-}
+};
 
-export function clearAccessToken() {
+export const clearAccessToken = () => {
 	localStorage.removeItem(TOKEN_KEY);
-}
+};
 
-async function postJson<T>(path: string, body: unknown): Promise<T> {
+const postJson = async <T>(path: string, body: unknown): Promise<T> => {
 	const res = await fetch(`${getApiUrl()}${path}`, {
 		method: 'POST',
 		headers: {
@@ -42,16 +43,16 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
 	}
 
 	return (await res.json()) as T;
-}
+};
 
-export async function signup(input: {
+export const signup = async (input: {
 	email: string;
 	password: string;
 	name?: string;
-}) {
+}) => {
 	return postJson<AuthResponse>('/auth/signup', input);
-}
+};
 
-export async function login(input: { email: string; password: string }) {
+export const login = async (input: { email: string; password: string }) => {
 	return postJson<AuthResponse>('/auth/login', input);
-}
+};

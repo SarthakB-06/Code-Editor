@@ -1,17 +1,17 @@
 import type { Server, Socket } from 'socket.io';
 import { SOCKET_EVENTS, type JoinRoomPayload, type User } from './events.js';
-import { ensureRoom, getUsers, roomUsers, roomState } from './state.js';
+import { ensureRoomLoaded, getUsers, roomUsers, roomState } from './state.js';
 
 type SocketData = {
     roomId?: string;
     user?: User;
 };
 
-export function registerRoomHandlers(io: Server) {
-    io.on('connection', (socket: Socket) => {
+export const registerRoomHandlers = (io: Server) => {
+    const onConnection = (socket: Socket) => {
         const s = socket as Socket & { data: SocketData };
 
-        socket.on(SOCKET_EVENTS.JOIN_ROOM, (payload: JoinRoomPayload) => {
+        const onJoinRoom = async (payload: JoinRoomPayload) => {
             const { roomId } = payload;
             const authedUser = s.data.user;
             const user = authedUser ?? payload.user;
@@ -25,7 +25,7 @@ export function registerRoomHandlers(io: Server) {
             s.data.roomId = roomId;
             s.data.user = user;
 
-            ensureRoom(roomId);
+            await ensureRoomLoaded(roomId);
             socket.join(roomId);
 
             roomUsers.get(roomId)!.set(socket.id, user);
@@ -40,15 +40,20 @@ export function registerRoomHandlers(io: Server) {
             });
 
             socket.to(roomId).emit(SOCKET_EVENTS.USER_JOIN, { socketId: socket.id, user });
-        });
+        };
 
-        socket.on('disconnect', () => {
+        const onDisconnect = () => {
             const roomId = s.data.roomId;
             const user = s.data.user;
             if (!roomId || !user) return;
 
             roomUsers.get(roomId)?.delete(socket.id);
             socket.to(roomId).emit(SOCKET_EVENTS.USER_LEAVE, { socketId: socket.id, user });
-        });
-    });
-}
+        };
+
+        socket.on(SOCKET_EVENTS.JOIN_ROOM, onJoinRoom);
+        socket.on('disconnect', onDisconnect);
+    };
+
+    io.on('connection', onConnection);
+};
