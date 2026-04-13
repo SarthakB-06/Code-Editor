@@ -1,5 +1,5 @@
 import Editor from '@monaco-editor/react';
-import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import type * as Monaco from 'monaco-editor';
 
@@ -25,6 +25,15 @@ type Cursor = {
     endLineNumber: number;
     endColumn: number;
   };
+};
+
+type ChatMessage = {
+  id: string;
+  roomId: string;
+  senderId: string;
+  senderName: string;
+  text: string;
+  createdAt: string;
 };
 
 type TreeNode =
@@ -134,6 +143,13 @@ const RoomPage = () => {
   const [selectedFolderPath, setSelectedFolderPath] = useState<string>('');
   const [renameFolderToPath, setRenameFolderToPath] = useState('');
 
+  const [activeRightTab, setActiveRightTab] = useState<'presence' | 'chat'>('presence');
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState('');
+
+  const [terminalOutput, setTerminalOutput] = useState<string>('');
+  const [isTerminalOpen, setIsTerminalOpen] = useState<'open' | 'closed' | 'running'>('closed');
+
   const fileContentsRef = useRef<Map<string, string>>(new Map());
   const activePathRef = useRef(activePath);
   const filePathsRef = useRef<string[]>(filePaths);
@@ -148,9 +164,18 @@ const RoomPage = () => {
   const remoteCursorByUserIdRef = useRef<Map<string, { path: string; cursor: Cursor; user: User }>>(new Map());
   const remoteDecorationIdsRef = useRef<Map<string, string[]>>(new Map());
   const applyRemoteCursorsRafRef = useRef<number | null>(null);
+  const chatBottomRef = useRef<HTMLDivElement | null>(null);
 
   const applyingRemoteRef = useRef(false);
   const emitTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (activeRightTab === 'chat') {
+      window.setTimeout(() => {
+        chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 50);
+    }
+  }, [chatMessages, activeRightTab]);
 
   useEffect(() => {
     activePathRef.current = activePath;
@@ -172,6 +197,14 @@ const RoomPage = () => {
     if (!roomId) return '';
     return `${window.location.origin}/room/${roomId}`;
   }, [roomId]);
+
+  const handleRunCode = () => {
+    if (!roomId || !activePath) return;
+    setTerminalOutput('Starting execution...\n');
+    setIsTerminalOpen('running');
+    const socket = getSocket();
+    socket.emit('code-run', { roomId, entryPath: activePath });
+  };
 
   const setFileContent = (path: string, content: string) => {
     fileContentsRef.current.set(path, content);
@@ -398,6 +431,14 @@ const RoomPage = () => {
     socket.emit('folder-delete', { roomId, path: selectedFolderPath });
   };
 
+  const handleSendChat = (e: FormEvent) => {
+    e.preventDefault();
+    if (!roomId || !chatInput.trim()) return;
+    const socket = getSocket();
+    socket.emit('chat-send', { roomId, text: chatInput.trim() });
+    setChatInput('');
+  };
+
   useEffect(() => {
     if (!roomId) return;
 
@@ -411,6 +452,7 @@ const RoomPage = () => {
 
     setSocketError(null);
     socket.emit('join-room', { roomId });
+    socket.emit('get-chat-history', { roomId });
 
     const onSocketErrorEvent = (payload: { message?: string } | string) => {
       if (typeof payload === 'string') {
@@ -684,6 +726,49 @@ const RoomPage = () => {
       scheduleApplyRemoteCursors();
     };
 
+    const onChatMessage = (payload: ChatMessage) => {
+      if (payload.roomId !== roomId) return;
+      setChatMessages((prev) => [...prev, payload]);
+    };
+
+    const onChatHistory = (payload: { roomId: string; messages: ChatMessage[] }) => {
+      if (payload.roomId !== roomId) return;
+      setChatMessages(payload.messages || []);
+    };
+
+    const onCodeExecutionStart = (payload: { roomId: string; entryPath: string; triggeredBy: string }) => {
+      if (payload.roomId !== roomId) return;
+      setIsTerminalOpen('running');
+      setTerminalOutput(`> Execution triggered by ${payload.triggeredBy} on ${payload.entryPath}...\n`);
+    };
+
+    const onCodeExecutionResult = (payload: {
+      roomId: string;
+      language: string;
+      version: string;
+      runStatus: { stdout: string; stderr: string; code: number };
+      compileStatus?: { stdout: string; stderr: string; code: number };
+    }) => {
+      if (payload.roomId !== roomId) return;
+      setIsTerminalOpen('open');
+
+      let out = `--- Language: ${payload.language} (v${payload.version}) ---\n`;
+      if (payload.compileStatus && payload.compileStatus.code !== 0) {
+        out += `\n[Compile Error - exited with ${payload.compileStatus.code}]\n${payload.compileStatus.stderr}\n`;
+      } else {
+        if (payload.runStatus.stdout) {
+          out += `\n[Output]\n${payload.runStatus.stdout}\n`;
+        }
+        if (payload.runStatus.stderr) {
+          out += `\n[Error Output - exited with ${payload.runStatus.code}]\n${payload.runStatus.stderr}\n`;
+        }
+        if (!payload.runStatus.stdout && !payload.runStatus.stderr) {
+          out += `\n[Program finished with exit code ${payload.runStatus.code} and no output]\n`;
+        }
+      }
+      setTerminalOutput(prev => prev + out);
+    };
+
     socket.on('room-joined', onRoomJoined);
     socket.on('user-join', onUserJoin);
     socket.on('user-leave', onUserLeave);
@@ -697,6 +782,10 @@ const RoomPage = () => {
     socket.on('code-update', onCodeUpdate);
     socket.on('active-file-update', onActiveFileUpdate);
     socket.on('cursor-move', onCursorMove);
+    socket.on('code-execution-start', onCodeExecutionStart);
+    socket.on('code-execution-result', onCodeExecutionResult);
+    socket.on('chat-message', onChatMessage);
+    socket.on('chat-history', onChatHistory);
 
     return () => {
       socket.off('room-joined', onRoomJoined);
@@ -712,6 +801,10 @@ const RoomPage = () => {
       socket.off('code-update', onCodeUpdate);
       socket.off('active-file-update', onActiveFileUpdate);
       socket.off('cursor-move', onCursorMove);
+      socket.off('code-execution-start', onCodeExecutionStart);
+      socket.off('code-execution-result', onCodeExecutionResult);
+      socket.off('chat-message', onChatMessage);
+      socket.off('chat-history', onChatHistory);
 
       if (emitTimerRef.current) {
         window.clearTimeout(emitTimerRef.current);
@@ -806,7 +899,7 @@ const RoomPage = () => {
             <span className="text-xs font-mono">{shareLink || '—'}</span>
           </div>
           <div className="flex items-center gap-2">
-            <button className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-primary text-on-primary-fixed font-bold text-sm hover:brightness-110 shadow-lg shadow-primary/10 transition-all active:scale-95">
+            <button onClick={handleRunCode} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-primary text-on-primary-fixed font-bold text-sm hover:brightness-110 shadow-lg shadow-primary/10 transition-all active:scale-95">
               <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>play_arrow</span>
               Run
             </button>
@@ -873,44 +966,113 @@ const RoomPage = () => {
               options={{ minimap: { enabled: false } }}
             />
           </div>
+
+          {/* Terminal / Output Panel */}
+          {isTerminalOpen !== 'closed' && (
+            <div className="h-56 bg-surface-container border-t border-outline-variant/20 flex flex-col shrink-0">
+              <div className="flex items-center justify-between px-4 h-8 border-b border-outline-variant/10 text-xs font-bold text-on-surface-variant uppercase tracking-widest bg-surface-container-high">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-sm">terminal</span>
+                  <span>Console Output {isTerminalOpen === 'running' ? '(Running...)' : ''}</span>
+                </div>
+                <button onClick={() => setIsTerminalOpen('closed')} className="hover:text-error transition-colors p-1">
+                  <span className="material-symbols-outlined text-sm">close</span>
+                </button>
+              </div>
+              <div className="flex-1 p-4 overflow-y-auto font-mono text-sm text-[#e5e5e5] whitespace-pre-wrap selection:bg-primary/30">
+                {terminalOutput || 'No output.'}
+              </div>
+            </div>
+          )}
         </section>
 
         {/* Right (Collaboration & Chat) */}
         <aside className="hidden xl:flex flex-col w-72 bg-surface-container border-l border-outline-variant/20">
           <div className="flex border-b border-outline-variant/20 h-10 shrink-0">
-            <button className="flex-1 flex items-center justify-center gap-2 text-xs font-bold text-primary border-b-2 border-primary">
+            <button
+              onClick={() => setActiveRightTab('presence')}
+              className={`flex-1 flex items-center justify-center gap-2 text-xs font-bold transition-colors ${activeRightTab === 'presence' ? 'text-primary border-b-2 border-primary' : 'text-on-surface-variant hover:bg-surface-variant/20'}`}
+            >
               <span className="material-symbols-outlined text-lg">group</span>
               PRESENCE
             </button>
+            <button
+              onClick={() => setActiveRightTab('chat')}
+              className={`flex-1 flex items-center justify-center gap-2 text-xs font-bold transition-colors ${activeRightTab === 'chat' ? 'text-primary border-b-2 border-primary' : 'text-on-surface-variant hover:bg-surface-variant/20'}`}
+            >
+              <span className="material-symbols-outlined text-lg">chat</span>
+              CHAT
+            </button>
           </div>
 
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <div className="p-4 space-y-4 flex-1 overflow-y-auto">
-              <div className="flex items-center justify-between text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest">
-                <span>{users.length} Active Users</span>
-              </div>
+          <div className="flex-1 flex flex-col overflow-hidden relative">
+            {activeRightTab === 'presence' ? (
+              <div className="p-4 space-y-4 flex-1 overflow-y-auto">
+                <div className="flex items-center justify-between text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest">
+                  <span>{users.length} Active Users</span>
+                </div>
 
-              <div className="space-y-2">
-                {users.map(u => (
-                  <div key={u.id} className="flex items-center gap-3 p-2 rounded-lg bg-surface-container-high/50 border border-outline-variant/10 hover:border-outline-variant/30 transition-all cursor-pointer">
-                    <div className="relative shrink-0">
-                      <div className={`w-10 h-10 rounded-full border-2 ${getAccentClasses(u.id).border} flex items-center justify-center bg-surface uppercase font-bold text-lg text-primary`}>{u.name[0]}</div>
-                      <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 ${getAccentClasses(u.id).dot} border-2 border-surface-container rounded-full animate-pulse`}></div>
+                <div className="space-y-2">
+                  {users.map(u => (
+                    <div key={u.id} className="flex items-center gap-3 p-2 rounded-lg bg-surface-container-high/50 border border-outline-variant/10 hover:border-outline-variant/30 transition-all cursor-pointer">
+                      <div className="relative shrink-0">
+                        <div className={`w-10 h-10 rounded-full border-2 ${getAccentClasses(u.id).border} flex items-center justify-center bg-surface uppercase font-bold text-lg text-primary`}>{u.name[0]}</div>
+                        <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 ${getAccentClasses(u.id).dot} border-2 border-surface-container rounded-full animate-pulse`}></div>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-bold text-on-surface truncate">{u.name}</div>
+                        <div className="text-[10px] text-on-surface-variant truncate">{activeFileByUserId[u.id] ? `Editing: ${activeFileByUserId[u.id]}` : 'Online'}</div>
+                      </div>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-sm font-bold text-on-surface truncate">{u.name}</div>
-                      <div className="text-[10px] text-on-surface-variant truncate">{activeFileByUserId[u.id] ? `Editing: ${activeFileByUserId[u.id]}` : 'Online'}</div>
+                  ))}
+                </div>
+
+                <div className="mt-6 p-3 rounded-xl bg-surface-container-high border border-outline-variant/10 space-y-2">
+                  <span className="text-[9px] font-bold text-primary uppercase tracking-widest">System Info</span>
+                  <p className="text-[9px] text-on-surface-variant leading-tight">Version: <span className="text-primary">{version}</span></p>
+                  <p className="text-[9px] text-on-surface-variant leading-tight overflow-hidden text-ellipsis selection:bg-primary/50">Room: {roomId}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col h-full bg-surface-container-low/30">
+                <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                  {chatMessages.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center text-on-surface-variant opacity-60">
+                      <span className="material-symbols-outlined text-4xl mb-2">forum</span>
+                      <p className="text-xs">No messages yet</p>
                     </div>
+                  ) : (
+                    chatMessages.map(msg => (
+                      <div key={msg.id} className="flex flex-col gap-1">
+                        <div className="flex items-baseline justify-between">
+                          <span className="text-xs font-bold text-primary">{msg.senderName}</span>
+                          <span className="text-[9px] text-on-surface-variant opacity-70">
+                            {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                        <p className="text-xs text-on-surface leading-relaxed break-words bg-surface-container border border-outline-variant/10 rounded-lg rounded-tl-none p-2 shadow-sm">
+                          {msg.text}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                  <div ref={chatBottomRef} />
+                </div>
+                <form onSubmit={handleSendChat} className="p-3 border-t border-outline-variant/20 bg-surface-container">
+                  <div className="flex bg-surface-container-high border border-outline-variant/30 rounded-lg overflow-hidden focus-within:border-primary transition-colors">
+                    <input
+                      value={chatInput}
+                      onChange={e => setChatInput(e.target.value)}
+                      placeholder="Type a message..."
+                      className="flex-1 bg-transparent px-3 py-2 text-xs text-on-surface focus:outline-none"
+                    />
+                    <button type="submit" disabled={!chatInput.trim()} className="px-3 text-primary hover:bg-primary/10 disabled:opacity-50 disabled:hover:bg-transparent transition-colors flex items-center justify-center">
+                      <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>send</span>
+                    </button>
                   </div>
-                ))}
+                </form>
               </div>
-
-              <div className="mt-6 p-3 rounded-xl bg-surface-container-high border border-outline-variant/10 space-y-2">
-                <span className="text-[9px] font-bold text-primary uppercase tracking-widest">System Info</span>
-                <p className="text-[9px] text-on-surface-variant leading-tight">Version: <span className="text-primary">{version}</span></p>
-                <p className="text-[9px] text-on-surface-variant leading-tight overflow-hidden text-ellipsis selection:bg-primary/50">Room: {roomId}</p>
-              </div>
-            </div>
+            )}
           </div>
         </aside>
       </main>

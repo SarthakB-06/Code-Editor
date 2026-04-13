@@ -25,6 +25,14 @@ export const SOCKET_EVENTS = {
     ACTIVE_FILE_UPDATE: 'active-file-update',
 
     CURSOR_MOVE: 'cursor-move',
+
+    CHAT_SEND: 'chat-send',
+    CHAT_MESSAGE: 'chat-message',
+    CHAT_HISTORY: 'chat-history',
+
+    CODE_RUN: 'code-run',
+    CODE_EXECUTION_START: 'code-execution-start',
+    CODE_EXECUTION_RESULT: 'code-execution-result',
 } as const;
 
 export type SocketEvent = (typeof SOCKET_EVENTS)[keyof typeof SOCKET_EVENTS];
@@ -158,6 +166,41 @@ export type CursorMovePayload = {
 export type ActiveFilePayload = {
     roomId: string;
     path: string;
+};
+
+export type ChatMessagePayload = {
+    id: string;
+    roomId: string;
+    senderId: string;
+    senderName: string;
+    text: string;
+    createdAt: string;
+};
+
+export type ChatSendPayload = {
+    roomId: string;
+    text: string;
+};
+
+export type CodeRunPayload = {
+    roomId: string;
+    entryPath: string; // The file they were viewing when they clicked run
+};
+
+export type CodeExecutionResultPayload = {
+    roomId: string;
+    runStatus: {
+        stdout: string;
+        stderr: string;
+        code: number;
+    };
+    compileStatus?: {
+        stdout: string;
+        stderr: string;
+        code: number;
+    };
+    language: string;
+    version: string;
 };
 
 
