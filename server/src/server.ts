@@ -17,9 +17,9 @@ const io = new Server(server, {
 
 const PORT = process.env.PORT || 5000;
 
-const authGate = (socket: Socket, next: (err?: Error) => void) => {
+const authGate = async (socket: Socket, next: (err?: Error) => void) => {
     try {
-        socketAuthMiddleware(socket);
+        await socketAuthMiddleware(socket);
         next();
     } catch {
         next(new Error('UNAUTHORIZED'));

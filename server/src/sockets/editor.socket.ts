@@ -1,27 +1,28 @@
 import type { Server, Socket } from 'socket.io';
 import { SOCKET_EVENTS, type CodeChangePayload } from './events.js';
-import { ensureRoomLoaded, roomState } from './state.js';
-import { scheduleDocumentSave } from '../modules/document/document.service.js';
+import { ensureRoomLoaded, roomState, toRoomFsSnapshot } from './state.js';
+import { scheduleRoomFsSave } from '../modules/room/roomFs.service.js';
 
 export const registerEditorHandlers = (io: Server) => {
   const onConnection = (socket: Socket) => {
     const onCodeChange = async (payload: CodeChangePayload) => {
-      const { roomId, code } = payload;
+      const { roomId, path, code } = payload;
 
       await ensureRoomLoaded(roomId);
       const state = roomState.get(roomId)!;
 
-      state.code = code;
+      state.files.set(path, code);
       state.version += 1;
 
       socket.to(roomId).emit(SOCKET_EVENTS.CODE_UPDATE, {
         roomId,
-        code: state.code,
+        path,
+        code: state.files.get(path) ?? '',
         version: state.version,
         from: socket.id,
       });
 
-      scheduleDocumentSave({ roomId, code: state.code, version: state.version });
+      scheduleRoomFsSave(toRoomFsSnapshot(roomId));
     };
 
     socket.on(SOCKET_EVENTS.CODE_CHANGE, onCodeChange);

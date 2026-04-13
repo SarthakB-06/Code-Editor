@@ -1,1 +1,163 @@
-@import 'tailwindcss'
+@import 'tailwindcss';
+
+@theme {
+  --color-secondary: #bdc7d9;
+  --color-surface-container-low: #181c22;
+  --color-on-secondary-container: #afb9cb;
+  --color-error-container: #93000a;
+  --color-on-tertiary-fixed: #002109;
+  --color-surface-container-high: #262a31;
+  --color-tertiary-fixed: #6bff8f;
+  --color-surface-dim: #10141a;
+  --color-secondary-container: #404a59;
+  --color-inverse-surface: #dfe2eb;
+  --color-surface-container-highest: #31353c;
+  --color-on-secondary: #27313f;
+  --color-tertiary-fixed-dim: #4ae176;
+  --color-surface: #10141a;
+  --color-on-tertiary: #003915;
+  --color-inverse-primary: #005ac2;
+  --color-tertiary-container: #00a74b;
+  --color-surface-bright: #353940;
+  --color-on-surface: #dfe2eb;
+  --color-on-tertiary-container: #003111;
+  --color-on-primary-fixed-variant: #004395;
+  --color-surface-container-lowest: #0a0e14;
+  --color-on-primary: #002e6a;
+  --color-surface-container: #1c2026;
+  --color-on-error-container: #ffdad6;
+  --color-secondary-fixed-dim: #bdc7d9;
+  --color-on-surface-variant: #c2c6d6;
+  --color-on-secondary-fixed-variant: #3d4756;
+  --color-on-primary-fixed: #001a42;
+  --color-on-tertiary-fixed-variant: #005321;
+  --color-on-error: #690005;
+  --color-surface-tint: #adc6ff;
+  --color-background: #10141a;
+  --color-primary-fixed-dim: #adc6ff;
+  --color-on-background: #dfe2eb;
+  --color-secondary-fixed: #d9e3f6;
+  --color-on-primary-container: #00285d;
+  --color-error: #ffb4ab;
+  --color-primary-container: #4d8eff;
+  --color-inverse-on-surface: #2d3137;
+  --color-surface-variant: #31353c;
+  --color-primary: #adc6ff;
+  --color-outline: #8c909f;
+  --color-outline-variant: #424754;
+  --color-on-secondary-fixed: #121c2a;
+  --color-tertiary: #4ae176;
+  --color-primary-fixed: #d8e2ff;
+
+  --font-headline: "Inter", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-label: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-body);
+    background-color: var(--color-background);
+    color: var(--color-on-surface);
+  }
+
+  .material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer utilities {
+  .glass-effect {
+    background: rgba(49, 53, 60, 0.8);
+    backdrop-filter: blur(20px);
+  }
+
+  .kinetic-gradient {
+    background: linear-gradient(135deg, #adc6ff 0%, #4d8eff 100%);
+  }
+
+  .remote-cursor {
+    display: inline-block;
+    width: 0;
+    border-left: 3px solid var(--color-primary);
+    margin-left: -1px;
+    height: 1.35em;
+    position: relative;
+    z-index: 50;
+    filter: drop-shadow(0 0 4px color-mix(in srgb, var(--color-primary) 60%, transparent));
+  }
+
+  .remote-cursor::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -4px;
+    width: 7px;
+    height: 7px;
+    border-radius: 9999px;
+    background: currentColor;
+    box-shadow: 0 0 10px currentColor;
+    opacity: 0.95;
+  }
+
+  .remote-cursor-0 {
+    border-left-color: var(--color-primary);
+  }
+
+  .remote-cursor-1 {
+    border-left-color: var(--color-tertiary);
+  }
+
+  .remote-cursor-2 {
+    border-left-color: var(--color-error);
+  }
+
+  .remote-cursor-3 {
+    border-left-color: var(--color-secondary-fixed);
+  }
+
+  .remote-cursor-0 {
+    color: var(--color-primary);
+  }
+
+  .remote-cursor-1 {
+    color: var(--color-tertiary);
+  }
+
+  .remote-cursor-2 {
+    color: var(--color-error);
+  }
+
+  .remote-cursor-3 {
+    color: var(--color-secondary-fixed);
+  }
+
+  .remote-selection-0 {
+    background-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
+  }
+
+  .remote-selection-1 {
+    background-color: color-mix(in srgb, var(--color-tertiary) 30%, transparent);
+  }
+
+  .remote-selection-2 {
+    background-color: color-mix(in srgb, var(--color-error) 30%, transparent);
+  }
+
+  .remote-selection-3 {
+    background-color: color-mix(in srgb, var(--color-secondary-fixed) 30%, transparent);
+  }
+}

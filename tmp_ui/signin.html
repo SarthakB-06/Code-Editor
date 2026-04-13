@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sign In | MonolithCode</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#bdc7d9",
+                        "surface-container-low": "#181c22",
+                        "on-secondary-container": "#afb9cb",
+                        "error-container": "#93000a",
+                        "on-tertiary-fixed": "#002109",
+                        "surface-container-high": "#262a31",
+                        "tertiary-fixed": "#6bff8f",
+                        "surface-dim": "#10141a",
+                        "secondary-container": "#404a59",
+                        "inverse-surface": "#dfe2eb",
+                        "surface-container-highest": "#31353c",
+                        "on-secondary": "#27313f",
+                        "tertiary-fixed-dim": "#4ae176",
+                        "surface": "#10141a",
+                        "on-tertiary": "#003915",
+                        "inverse-primary": "#005ac2",
+                        "tertiary-container": "#00a74b",
+                        "surface-bright": "#353940",
+                        "on-surface": "#dfe2eb",
+                        "on-tertiary-container": "#003111",
+                        "on-primary-fixed-variant": "#004395",
+                        "surface-container-lowest": "#0a0e14",
+                        "on-primary": "#002e6a",
+                        "surface-container": "#1c2026",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#bdc7d9",
+                        "on-surface-variant": "#c2c6d6",
+                        "on-secondary-fixed-variant": "#3d4756",
+                        "on-primary-fixed": "#001a42",
+                        "on-tertiary-fixed-variant": "#005321",
+                        "on-error": "#690005",
+                        "surface-tint": "#adc6ff",
+                        "background": "#10141a",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-background": "#dfe2eb",
+                        "secondary-fixed": "#d9e3f6",
+                        "on-primary-container": "#00285d",
+                        "error": "#ffb4ab",
+                        "primary-container": "#4d8eff",
+                        "inverse-on-surface": "#2d3137",
+                        "surface-variant": "#31353c",
+                        "primary": "#adc6ff",
+                        "outline": "#8c909f",
+                        "outline-variant": "#424754",
+                        "on-secondary-fixed": "#121c2a",
+                        "tertiary": "#4ae176",
+                        "primary-fixed": "#d8e2ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"],
+                        "mono": ["JetBrains Mono"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-effect {
+            background: rgba(49, 53, 60, 0.8);
+            backdrop-filter: blur(20px);
+        }
+        .kinetic-gradient {
+            background: linear-gradient(135deg, #adc6ff 0%, #4d8eff 100%);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
+<!-- Ambient Background Decorations -->
+<div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-[120px]"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-tertiary/5 blur-[120px]"></div>
+<!-- Main Container (Suppressing Shell for Transactional Focus) -->
+<main class="w-full max-w-[480px] z-10">
+<div class="glass-effect rounded-xl shadow-[0px_12px_32px_rgba(0,0,0,0.4)] p-8 md:p-12 border border-outline-variant/10">
+<!-- Brand Identity -->
+<div class="flex flex-col items-center mb-10">
+<div class="mb-6 flex items-center justify-center">
+<span class="text-3xl font-black tracking-tighter text-primary">Monolith_IDE</span>
+</div>
+<h1 class="text-2xl font-bold text-on-surface tracking-tight text-center">Sign in to MonolithCode</h1>
+<p class="text-on-surface-variant text-sm mt-2 font-label">The high-performance workspace for elite developers.</p>
+</div>
+<!-- Social Authentication -->
+<div class="space-y-3">
+<button class="w-full flex items-center justify-center gap-3 px-4 py-3 bg-surface-container-high hover:bg-surface-bright text-on-surface text-sm font-semibold rounded-lg transition-all duration-300 border border-outline-variant/20">
+<img alt="GitHub Logo" class="w-5 h-5 invert" data-alt="minimalist white github octopus logo on a transparent background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsJdN2jDOwfltzQgKTDfq9yWN44bAlK8UseeopnRBdgVOOdXAXLKaNKRGJ7Lu-A7rt5m90axMJjK8YCnL2mjRXRPkKv7b85zNvgbdG6gjGh18VSqFckZLeWeLt6pAXjbvkr2Qpr4GrKGcnJpRTPcgggCqWTS1UFCN1oGfULhiy7U6QYHWDLyRhnFKKa16qpnWz9MxlY8nnq7UvdqOaNRUOXsHbbmW3ULMskTE63gxRf9wdOTrv38FiJr7z1UafdrnocIItHDGpbOI"/>
+<span>Continue with GitHub</span>
+</button>
+<button class="w-full flex items-center justify-center gap-3 px-4 py-3 bg-surface-container-high hover:bg-surface-bright text-on-surface text-sm font-semibold rounded-lg transition-all duration-300 border border-outline-variant/20">
+<img alt="Google Logo" class="w-5 h-5" data-alt="standard multicolored google g logo on a transparent background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2YGqI2KGOBEw4PBknesDP9H4vwPh2kTxn8fAVQdHXTkyyXi3ZN-geDBRKPIKQe6b3w7dAfd8N4q0-XwCnPrqfb44U30bJIltqPhJkyXT5OfKzJ_7xcTvFtxAS_44jj3ILbAvvz4cZOqtK8HfgGKe23--BezHgMBVMg6Zfr6wZ7Oskr_mM-qZE_hhDBKpok1HYZLU90guUaYqL5MKjBgTHH6hnd9E3Z_7fpGtqYb5nntsOM0dj9D_xARntbf2ekWzm0n4wnsAMJmY"/>
+<span>Continue with Google</span>
+</button>
+</div>
+<!-- Separator -->
+<div class="relative flex items-center py-8">
+<div class="flex-grow border-t border-outline-variant/20"></div>
+<span class="flex-shrink mx-4 text-on-surface-variant text-xs font-mono uppercase tracking-widest">or</span>
+<div class="flex-grow border-t border-outline-variant/20"></div>
+</div>
+<!-- Standard Auth Form -->
+<form action="#" class="space-y-6" onsubmit="return false;">
+<div class="space-y-1.5">
+<label class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider ml-1" for="email">Email Address</label>
+<div class="relative group">
+<input class="w-full bg-surface-container-highest border-b-2 border-transparent focus:border-primary focus:ring-0 text-on-surface placeholder:text-on-surface-variant/40 rounded-lg px-4 py-3 transition-all duration-200 outline-none font-mono text-sm" id="email" name="email" placeholder="dev@monolith.io" type="email"/>
+</div>
+</div>
+<div class="space-y-1.5">
+<div class="flex justify-between items-center px-1">
+<label class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider" for="password">Password</label>
+<a class="text-xs font-semibold text-primary hover:text-primary-fixed-dim transition-colors" href="#">Forgot password?</a>
+</div>
+<div class="relative group">
+<input class="w-full bg-surface-container-highest border-b-2 border-transparent focus:border-primary focus:ring-0 text-on-surface placeholder:text-on-surface-variant/40 rounded-lg px-4 py-3 transition-all duration-200 outline-none font-mono text-sm" id="password" name="password" placeholder="••••••••" type="password"/>
+</div>
+</div>
+<div class="pt-2">
+<button class="w-full kinetic-gradient text-on-primary-container py-3.5 px-4 rounded-lg font-bold text-sm tracking-tight hover:shadow-[0_0_20px_rgba(173,198,255,0.3)] active:opacity-90 transition-all duration-300 flex items-center justify-center gap-2" type="submit">
+<span>Sign In</span>
+<span class="material-symbols-outlined text-lg" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</form>
+<!-- Footer -->
+<div class="mt-10 text-center">
+<p class="text-on-surface-variant text-sm">
+                    Don't have an account? 
+                    <a class="text-primary font-bold hover:underline ml-1" href="#">Sign up</a>
+</p>
+</div>
+</div>
+<!-- System Metadata -->
+<div class="mt-8 flex justify-between items-center px-4 opacity-40">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-tertiary shadow-[0_0_4px_#4ae176]"></div>
+<span class="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant">System Online</span>
+</div>
+<span class="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant">v4.0.12-stable</span>
+</div>
+</main>
+<!-- Decorative Corner Element -->
+<div class="fixed bottom-8 right-8 pointer-events-none hidden lg:block">
+<div class="text-[64px] font-black text-white/5 select-none leading-none tracking-tighter">IDE</div>
+</div>
+</body></html>

@@ -1,6 +1,8 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
+import { createDbUser, findUserByEmail, findUserById } from '../user/user.service.js';
+
 export type AuthUser = {
     id: string;
     email: string;
@@ -15,9 +17,6 @@ export type JwtPayload = {
     email: string;
     name: string;
 };
-
-const usersByEmail = new Map<string, AuthUser>();
-const usersById = new Map<string, AuthUser>();
 
 const getJwtSecret = () => {
     const secret = process.env.JWT_SECRET;
@@ -45,45 +44,56 @@ export const createUser = async (input: {
     name: string;
     password: string;
 }): Promise<PublicUser> => {
-    const email = input.email.trim().toLowerCase();
-    if (usersByEmail.has(email)) {
-        throw new Error('EMAIL_ALREADY_EXISTS');
-    }
+    const existing = await findUserByEmail(input.email);
+    if (existing) throw new Error('EMAIL_ALREADY_EXISTS');
 
     const passwordHash = await bcrypt.hash(input.password, 10);
 
-    const user: AuthUser = {
-        id: input.id,
-        email,
-        name: input.name.trim() || email,
-        passwordHash,
-    };
+    try {
+        const user = await createDbUser({
+            id: input.id,
+            email: input.email,
+            name: input.name,
+            passwordHash,
+        });
 
-    usersByEmail.set(email, user);
-    usersById.set(user.id, user);
-
-    const { passwordHash: _ph, ...publicUser } = user;
-    return publicUser;
+        return {
+            id: user._id,
+            email: user.email,
+            name: user.name,
+        };
+    } catch (err) {
+        const e = err as { code?: number };
+        if (e?.code === 11000) {
+            throw new Error('EMAIL_ALREADY_EXISTS');
+        }
+        throw err;
+    }
 };
 
 export const validateUserLogin = async (input: {
     email: string;
     password: string;
 }): Promise<PublicUser> => {
-    const email = input.email.trim().toLowerCase();
-    const user = usersByEmail.get(email);
+    const user = await findUserByEmail(input.email);
     if (!user) throw new Error('INVALID_CREDENTIALS');
 
     const ok = await bcrypt.compare(input.password, user.passwordHash);
     if (!ok) throw new Error('INVALID_CREDENTIALS');
 
-    const { passwordHash: _ph, ...publicUser } = user;
-    return publicUser;
+    return {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+    };
 };
 
-export const getUserById = (id: string): PublicUser | null => {
-    const user = usersById.get(id);
+export const getUserById = async (id: string): Promise<PublicUser | null> => {
+    const user = await findUserById(id);
     if (!user) return null;
-    const { passwordHash: _ph, ...publicUser } = user;
-    return publicUser;
+    return {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+    };
 };

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-surface-variant": "#c2c6d6",
+            "outline": "#8c909f",
+            "inverse-on-surface": "#2d3137",
+            "surface-variant": "#31353c",
+            "surface-container-highest": "#31353c",
+            "tertiary-fixed": "#6bff8f",
+            "primary-fixed-dim": "#adc6ff",
+            "surface-container-lowest": "#0a0e14",
+            "on-tertiary-fixed": "#002109",
+            "surface-dim": "#10141a",
+            "tertiary-container": "#00a74b",
+            "error-container": "#93000a",
+            "on-primary-fixed": "#001a42",
+            "outline-variant": "#424754",
+            "secondary-container": "#404a59",
+            "tertiary-fixed-dim": "#4ae176",
+            "secondary": "#bdc7d9",
+            "on-error-container": "#ffdad6",
+            "on-tertiary": "#003915",
+            "on-secondary-fixed-variant": "#3d4756",
+            "primary-container": "#4d8eff",
+            "on-secondary-fixed": "#121c2a",
+            "surface-bright": "#353940",
+            "surface": "#10141a",
+            "primary": "#adc6ff",
+            "on-primary-container": "#00285d",
+            "surface-container": "#1c2026",
+            "on-surface": "#dfe2eb",
+            "on-error": "#690005",
+            "inverse-surface": "#dfe2eb",
+            "surface-tint": "#adc6ff",
+            "surface-container-low": "#181c22",
+            "inverse-primary": "#005ac2",
+            "secondary-fixed-dim": "#bdc7d9",
+            "background": "#10141a",
+            "secondary-fixed": "#d9e3f6",
+            "on-primary-fixed-variant": "#004395",
+            "on-secondary": "#27313f",
+            "on-background": "#dfe2eb",
+            "surface-container-high": "#262a31",
+            "primary-fixed": "#d8e2ff",
+            "on-tertiary-fixed-variant": "#005321",
+            "on-primary": "#002e6a",
+            "tertiary": "#4ae176",
+            "on-secondary-container": "#afb9cb",
+            "on-tertiary-container": "#003111",
+            "error": "#ffb4ab"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "fontFamily": {
+            "headline": ["Inter"],
+            "body": ["Inter"],
+            "label": ["Inter"],
+            "mono": ["JetBrains Mono"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      line-height: 1;
+      text-transform: none;
+      letter-spacing: normal;
+      word-wrap: normal;
+      white-space: nowrap;
+      direction: ltr;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #0a0e14;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #31353c;
+      border-radius: 2px;
+    }
+    .code-editor-bg {
+      background-color: #0d1117;
+    }
+    .token-keyword { color: #ff7b72; }
+    .token-function { color: #d2a8ff; }
+    .token-string { color: #a5d6ff; }
+    .token-comment { color: #8b949e; }
+    .token-operator { color: #79c0ff; }
+    .token-variable { color: #ffa657; }
+    .token-component { color: #7ee787; }
+    .token-constant { color: #79c0ff; }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body h-screen flex flex-col overflow-hidden selection:bg-primary/30">
+<!-- Slimmer TopAppBar -->
+<header class="h-12 bg-surface-container border-b border-outline-variant/30 flex items-center justify-between px-4 z-50 shrink-0">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 font-bold text-primary tracking-tight">
+<span class="material-symbols-outlined text-lg" data-icon="terminal">terminal</span>
+<span class="hidden sm:inline">Monolith</span>
+</div>
+<!-- Breadcrumbs Path -->
+<nav class="hidden md:flex items-center gap-2 text-xs font-medium text-on-surface-variant">
+<span class="hover:text-on-surface cursor-pointer">src</span>
+<span class="material-symbols-outlined text-[14px]" data-icon="chevron_right">chevron_right</span>
+<span class="text-on-surface flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm text-blue-400" data-icon="javascript">javascript</span>
+          App.js
+        </span>
+</nav>
+</div>
+<div class="flex items-center gap-3">
+<!-- Room ID -->
+<div class="hidden lg:flex items-center gap-2 px-2.5 py-1 bg-surface-container-high rounded border border-outline-variant/20 text-on-surface-variant group cursor-pointer hover:border-outline-variant transition-colors">
+<span class="text-[10px] font-mono tracking-wider">ROOM: room-k3-j9-f1</span>
+<span class="material-symbols-outlined text-sm opacity-50 group-hover:opacity-100" data-icon="content_copy">content_copy</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-surface-bright transition-all active:scale-95 text-on-surface">
+<span class="material-symbols-outlined text-lg" data-icon="share">share</span>
+          Share
+        </button>
+<button class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-primary text-on-primary-fixed font-bold text-sm hover:brightness-110 shadow-lg shadow-primary/10 transition-all active:scale-95">
+<span class="material-symbols-outlined text-lg" data-icon="play_arrow" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+          Run
+        </button>
+</div>
+<div class="h-6 w-px bg-outline-variant/30 mx-1"></div>
+<button class="p-1.5 rounded-md hover:bg-surface-variant text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="settings">settings</span>
+</button>
+</div>
+</header>
+<main class="flex-1 flex overflow-hidden">
+<!-- 3-Panel System: Left (File Explorer) -->
+<aside class="hidden md:flex flex-col w-60 bg-surface-container-low border-r border-outline-variant/20 shrink-0">
+<div class="p-4 flex items-center justify-between text-on-surface-variant">
+<span class="text-[10px] font-bold uppercase tracking-widest opacity-60">Explorer</span>
+<div class="flex gap-1">
+<span class="material-symbols-outlined text-sm cursor-pointer hover:text-on-surface" data-icon="note_add">note_add</span>
+<span class="material-symbols-outlined text-sm cursor-pointer hover:text-on-surface" data-icon="create_new_folder">create_new_folder</span>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar px-2 space-y-0.5">
+<div class="flex items-center gap-2 py-1 px-2 hover:bg-surface-variant/40 rounded cursor-pointer transition-colors text-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-sm" data-icon="expand_more">expand_more</span>
+<span class="material-symbols-outlined text-sm text-amber-500/80" data-icon="folder" style="font-variation-settings: 'FILL' 1;">folder</span>
+          src
+        </div>
+<div class="pl-4 space-y-0.5">
+<div class="flex items-center gap-2 py-1 px-2 bg-primary/10 text-primary font-medium rounded cursor-pointer transition-colors text-sm relative">
+<div class="absolute left-0 w-0.5 h-4 bg-primary rounded-full"></div>
+<span class="material-symbols-outlined text-sm text-blue-400" data-icon="javascript">javascript</span>
+            App.js
+          </div>
+<div class="flex items-center gap-2 py-1 px-2 hover:bg-surface-variant/40 rounded cursor-pointer transition-colors text-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-sm text-blue-400" data-icon="javascript">javascript</span>
+            index.js
+          </div>
+<div class="flex items-center gap-2 py-1 px-2 hover:bg-surface-variant/40 rounded cursor-pointer transition-colors text-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-sm text-blue-300" data-icon="css">css</span>
+            styles.css
+          </div>
+</div>
+<div class="flex items-center gap-2 py-1 px-2 hover:bg-surface-variant/40 rounded cursor-pointer transition-colors text-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-sm" data-icon="description">description</span>
+          package.json
+        </div>
+</div>
+</aside>
+<!-- 3-Panel System: Center (Code Editor) -->
+<section class="flex-1 flex flex-col bg-surface-container-lowest overflow-hidden">
+<!-- File Tabs -->
+<div class="flex bg-surface-container-low border-b border-outline-variant/10 h-10 items-center overflow-x-auto custom-scrollbar">
+<div class="flex h-full items-center px-4 gap-2 bg-[#0d1117] text-primary border-t-2 border-primary cursor-pointer shrink-0">
+<span class="material-symbols-outlined text-[14px] text-blue-400" data-icon="javascript">javascript</span>
+<span class="text-xs font-semibold">App.js</span>
+<span class="material-symbols-outlined text-[14px] hover:bg-surface-variant rounded-full p-0.5" data-icon="close">close</span>
+</div>
+<div class="flex h-full items-center px-4 gap-2 text-on-surface-variant hover:bg-surface-variant/30 cursor-pointer transition-colors shrink-0">
+<span class="material-symbols-outlined text-[14px] text-blue-400" data-icon="javascript">javascript</span>
+<span class="text-xs font-medium">index.js</span>
+<span class="material-symbols-outlined text-[14px] opacity-0 group-hover:opacity-100" data-icon="close">close</span>
+</div>
+<div class="flex h-full items-center px-4 gap-2 text-on-surface-variant hover:bg-surface-variant/30 cursor-pointer transition-colors shrink-0">
+<span class="material-symbols-outlined text-[14px] text-blue-300" data-icon="css">css</span>
+<span class="text-xs font-medium">styles.css</span>
+</div>
+</div>
+<!-- Editor Content -->
+<div class="flex-1 overflow-auto custom-scrollbar code-editor-bg font-mono text-[14px] leading-relaxed flex">
+<!-- Gutter -->
+<div class="w-12 pt-4 flex-shrink-0 text-right pr-4 text-outline/40 select-none border-r border-outline-variant/5 bg-surface-container-low/20">
+<div v-for="n in 25">1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div>
+</div>
+<!-- Code Content -->
+<div class="flex-1 pt-4 pl-4 relative group">
+<!-- Alice Cursor -->
+<div class="absolute left-4 top-[178px] z-10">
+<div class="w-[2px] h-5 bg-blue-500 animate-pulse"></div>
+<div class="absolute -top-5 left-0 bg-blue-500 text-[10px] px-1.5 py-0.5 text-white rounded-sm font-bold shadow-lg whitespace-nowrap">Alice</div>
+</div>
+<!-- Bob Cursor -->
+<div class="absolute left-[340px] top-[306px] z-10">
+<div class="w-[2px] h-5 bg-tertiary animate-pulse"></div>
+<div class="absolute -top-5 left-0 bg-tertiary text-[10px] px-1.5 py-0.5 text-on-tertiary-fixed rounded-sm font-bold shadow-lg whitespace-nowrap">Bob</div>
+</div>
+<div class="space-y-0.5">
+<div><span class="token-keyword">import</span> <span class="text-on-surface">React</span> <span class="token-keyword">from</span> <span class="token-string">'react'</span>;</div>
+<div><span class="token-keyword">import</span> { <span class="token-function">CodeEditor</span> } <span class="token-keyword">from</span> <span class="token-string">'./components'</span>;</div>
+<div class="h-4"></div>
+<div><span class="token-keyword">export default function</span> <span class="token-function">App</span>() {</div>
+<div>  <span class="token-keyword">const</span> [<span class="text-on-surface">code</span>, <span class="token-function">setCode</span>] = <span class="text-on-surface">React</span>.<span class="token-function">useState</span>(<span class="token-string">""</span>);</div>
+<div class="h-4"></div>
+<!-- Active Line Highlight -->
+<div class="relative bg-primary/5 -ml-4 pl-4">
+<span class="token-keyword">  return</span> (
+            </div>
+<div>    &lt;<span class="token-component">div</span> <span class="token-variable">className</span>=<span class="token-string">"monolith-editor"</span>&gt;</div>
+<div>      &lt;<span class="token-component">CodeEditor</span> </div>
+<div>        <span class="token-variable">value</span>={<span class="text-on-surface">code</span>}</div>
+<div>        <span class="token-variable">onChange</span>={<span class="token-variable">v</span> =&gt; <span class="token-function">setCode</span>(<span class="text-on-surface">v</span>)}</div>
+<div>      /&gt;</div>
+<div>    &lt;/<span class="token-component">div</span>&gt;</div>
+<div>  );</div>
+<div>}</div>
+<div class="h-4"></div>
+<div><span class="token-comment">// Collaboration engine initialized</span></div>
+<div><span class="token-keyword">const</span> <span class="token-constant">config</span> = {</div>
+<div>  <span class="token-variable">realtime</span>: <span class="token-keyword">true</span>,</div>
+<div>  <span class="token-variable">theme</span>: <span class="token-string">"monolith-dark"</span></div>
+<div>};</div>
+</div>
+</div>
+</div>
+<!-- Footer Status -->
+<footer class="h-6 bg-surface-container border-t border-outline-variant/20 flex items-center justify-between px-3 text-[10px] text-on-surface-variant font-medium">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1 hover:text-on-surface cursor-pointer">
+<span class="material-symbols-outlined text-[14px]" data-icon="hub">hub</span>
+<span>main*</span>
+</div>
+<div class="flex items-center gap-1 text-tertiary">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle">check_circle</span>
+<span>Prettier applied</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span>Ln 7, Col 12</span>
+<span>UTF-8</span>
+<span class="hover:text-on-surface cursor-pointer">JavaScript React</span>
+</div>
+</footer>
+</section>
+<!-- 3-Panel System: Right (Collaboration & Chat) -->
+<aside class="hidden xl:flex flex-col w-72 bg-surface-container border-l border-outline-variant/20">
+<!-- Tabs -->
+<div class="flex border-b border-outline-variant/20 h-10 shrink-0">
+<button class="flex-1 flex items-center justify-center gap-2 text-xs font-bold text-primary border-b-2 border-primary">
+<span class="material-symbols-outlined text-lg" data-icon="group">group</span>
+          PRESENCE
+        </button>
+<button class="flex-1 flex items-center justify-center gap-2 text-xs font-bold text-on-surface-variant hover:bg-surface-variant/30 transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="chat_bubble">chat_bubble</span>
+          CHAT
+          <span class="w-1.5 h-1.5 bg-error rounded-full mb-2"></span>
+</button>
+</div>
+<!-- Presence Tab Content -->
+<div class="flex-1 flex flex-col overflow-hidden">
+<div class="p-4 space-y-4 flex-1 overflow-y-auto custom-scrollbar">
+<div class="flex items-center justify-between text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest">
+<span>3 Active Users</span>
+</div>
+<div class="space-y-2">
+<!-- User Alice -->
+<div class="flex items-center gap-3 p-2 rounded-lg bg-surface-container-high/50 border border-outline-variant/10 hover:border-outline-variant/30 transition-all cursor-pointer">
+<div class="relative shrink-0">
+<img alt="Alice" class="w-10 h-10 rounded-full border-2 border-blue-500/30" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6lRusVYhoJhCElpXuybsoKPAp8Qs5a86v4wxQyx3XyVgsdD7_9IxfZXiuyu0JQ8SMXdnnuqLzGWQR6go3MO4NpXxgitSqzPZ-PULOOYcs4RP0lwBSiaANNgiECJc-FsLk8ZF7Uzkl2xo75Uy4DC7slo-clB_8_p00gHuNIQjP8moyLcFNZCI91n0aWVNhj-7vUPFZ80IzTktYZGupcI8BQvCzCmHpCs1WZGiKUJm3B2g94S9XWRd6hKLO12u9_0uTMQSApRGIk4s"/>
+<div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-tertiary border-2 border-surface-container rounded-full"></div>
+</div>
+<div class="min-w-0">
+<div class="text-sm font-bold text-on-surface">Alice</div>
+<div class="text-[10px] text-primary truncate">Editing App.js</div>
+</div>
+</div>
+<!-- User Bob -->
+<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-variant/20 transition-all cursor-pointer">
+<div class="relative shrink-0">
+<img alt="Bob" class="w-10 h-10 rounded-full border-2 border-tertiary/30" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbwPy_oE71I2p7w1y-7SksgUmdNazT4wCD3rbVjUPzRn8wrWU-T2AiuZN1H_W7693Ayd3aAs34bUPtiO5l6-rP8yqGJBdDBD8u-gdeBDcmuHZ78M2hf6hq5f_muPGh2jAkfZ-HG1X8ryoELVRA6GzZ3rX-shWCZwgW7LP6b9bGKnlfh8AAd4kLRzTnoVcSpWrnP9mN0i0fdhylEkYMUv3Xo7XqFqESs-xCVH52f5TPSHlWlPuTvUndQzazKiNso-7PN_yBpRC8e8w"/>
+<div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-tertiary border-2 border-surface-container rounded-full"></div>
+</div>
+<div class="min-w-0">
+<div class="text-sm font-semibold text-on-surface">Bob</div>
+<div class="text-[10px] text-on-surface-variant">Idle</div>
+</div>
+</div>
+<!-- User Charlie -->
+<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-variant/20 transition-all cursor-pointer">
+<div class="relative shrink-0">
+<img alt="Charlie" class="w-10 h-10 rounded-full border-2 border-purple-500/30" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDEhq30Uc5AtI6IMERZLwBkdnJhnuSKl1NEWX3tWTYxYvFGMWlJMXrcjJfH3mMlfFgyXAQSQYLVJNKj5E4G3v4XMdqxf1AJIkb3zr3HFBAQXkEHSuVBVn2IFZ3znYDvVlgeJax8h-zBe7-LifdMa-eIgl2W1Uf6UrwcQiRkySZcRjlvs-O2vSM49bEB-AQ4TIKfVJxi0xdAzf_WKrYc9ZCEo9ILj6zKapzm29nqUlEkVEVee0qInEFNI34Dk0jGuv3fYy3vYee-FwY"/>
+<div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-tertiary border-2 border-surface-container rounded-full"></div>
+</div>
+<div class="min-w-0">
+<div class="text-sm font-semibold text-on-surface">Charlie</div>
+<div class="text-[10px] text-on-surface-variant">Viewing</div>
+</div>
+</div>
+</div>
+<!-- Mini Stats Bento -->
+<div class="mt-6 p-3 rounded-xl bg-surface-container-high border border-outline-variant/10 space-y-2">
+<span class="text-[9px] font-bold text-primary uppercase tracking-widest">Global Activity</span>
+<div class="flex items-end gap-1 h-8">
+<div class="w-1 bg-primary/30 h-1/2 rounded-full"></div>
+<div class="w-1 bg-primary/60 h-3/4 rounded-full"></div>
+<div class="w-1 bg-primary/20 h-1/3 rounded-full"></div>
+<div class="w-1 bg-primary h-full rounded-full"></div>
+<div class="w-1 bg-primary/80 h-2/3 rounded-full"></div>
+<div class="w-1 bg-primary/50 h-1/2 rounded-full"></div>
+</div>
+<p class="text-[9px] text-on-surface-variant leading-tight">High density in <span class="text-primary">App.js</span></p>
+</div>
+</div>
+<!-- Integrated Chat Area (Initially Hidden/Minimized but structured) -->
+<div class="mt-auto border-t border-outline-variant/20 bg-surface-container-low p-3 space-y-3">
+<div class="flex items-center gap-2 mb-2">
+<span class="text-[10px] font-bold text-on-surface-variant">RECENT CHAT</span>
+<div class="flex-1 h-px bg-outline-variant/10"></div>
+</div>
+<div class="text-[11px] leading-relaxed">
+<span class="font-bold text-primary">Alice:</span> <span class="text-on-surface-variant">Can you check line 8?</span>
+</div>
+<div class="relative">
+<input class="w-full bg-surface-container-highest border-none rounded-lg py-1.5 px-3 text-xs focus:ring-1 focus:ring-primary placeholder:text-on-surface-variant/40" placeholder="Message..." type="text"/>
+<span class="material-symbols-outlined absolute right-2 top-1.5 text-sm text-on-surface-variant/60" data-icon="send">send</span>
+</div>
+</div>
+</div>
+</aside>
+</main>
+<!-- Mobile Bottom Navigation -->
+<div class="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-surface-container flex items-center justify-around border-t border-outline-variant/10 z-[100]">
+<div class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined" data-icon="folder_open">folder_open</span>
+<span class="text-[10px]">Files</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="chat">chat</span>
+<span class="text-[10px]">Chat</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="text-[10px]">Users</span>
+</div>
+</div>
+</body></html>

@@ -1,6 +1,13 @@
 import type { Server, Socket } from 'socket.io';
 import { SOCKET_EVENTS, type JoinRoomPayload, type User } from './events.js';
-import { ensureRoomLoaded, getUsers, roomUsers, roomState } from './state.js';
+import {
+    ensureRoomLoaded,
+    getDefaultActivePath,
+    getUsers,
+    roomUsers,
+    roomState,
+    toRoomFsSnapshot,
+} from './state.js';
 
 type SocketData = {
     roomId?: string;
@@ -31,10 +38,15 @@ export const registerRoomHandlers = (io: Server) => {
             roomUsers.get(roomId)!.set(socket.id, user);
 
             const state = roomState.get(roomId)!;
+            const activePath = getDefaultActivePath(roomId);
+            const snapshot = toRoomFsSnapshot(roomId);
 
             socket.emit(SOCKET_EVENTS.ROOM_JOINED, {
                 roomId,
-                code: state.code,
+                folders: snapshot.folders.map((p) => ({ path: p })),
+                files: snapshot.files,
+                activePath,
+                code: state.files.get(activePath) ?? '',
                 version: state.version,
                 users: getUsers(roomId),
             });

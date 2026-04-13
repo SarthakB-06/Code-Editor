@@ -1,13 +1,14 @@
 import type { Socket } from 'socket.io';
 
 import { verifyAccessToken } from '../modules/auth/auth.service.js';
+import { findUserById } from '../modules/user/user.service.js';
 import type { User } from './events.js';
 
 type SocketData = {
     user?: User;
 };
 
-export const socketAuthMiddleware = (socket: Socket) => {
+export const socketAuthMiddleware = async (socket: Socket) => {
     const s = socket as Socket & { data: SocketData };
 
     const token =
@@ -22,8 +23,11 @@ export const socketAuthMiddleware = (socket: Socket) => {
 
     const payload = verifyAccessToken(token);
 
+    const dbUser = await findUserById(payload.sub);
+    if (!dbUser) throw new Error('UNAUTHORIZED');
+
     s.data.user = {
-        id: payload.sub,
-        name: payload.name || payload.email,
+        id: dbUser._id,
+        name: dbUser.name,
     };
 };

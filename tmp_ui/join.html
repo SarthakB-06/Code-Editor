@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#31353c",
+                        "surface-bright": "#353940",
+                        "primary-container": "#4d8eff",
+                        "on-primary": "#002e6a",
+                        "inverse-surface": "#dfe2eb",
+                        "inverse-primary": "#005ac2",
+                        "outline-variant": "#424754",
+                        "surface-container-lowest": "#0a0e14",
+                        "on-tertiary-fixed": "#002109",
+                        "on-tertiary": "#003915",
+                        "error": "#ffb4ab",
+                        "secondary": "#bdc7d9",
+                        "on-secondary": "#27313f",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-fixed": "#121c2a",
+                        "primary": "#adc6ff",
+                        "on-surface-variant": "#c2c6d6",
+                        "on-primary-fixed": "#001a42",
+                        "surface-container-low": "#181c22",
+                        "tertiary-container": "#00a74b",
+                        "error-container": "#93000a",
+                        "on-secondary-container": "#afb9cb",
+                        "background": "#10141a",
+                        "surface-tint": "#adc6ff",
+                        "tertiary-fixed": "#6bff8f",
+                        "surface-dim": "#10141a",
+                        "secondary-container": "#404a59",
+                        "on-surface": "#dfe2eb",
+                        "surface-container-high": "#262a31",
+                        "secondary-fixed-dim": "#bdc7d9",
+                        "on-background": "#dfe2eb",
+                        "on-error": "#690005",
+                        "tertiary-fixed-dim": "#4ae176",
+                        "tertiary": "#4ae176",
+                        "surface-container-highest": "#31353c",
+                        "on-primary-fixed-variant": "#004395",
+                        "outline": "#8c909f",
+                        "on-tertiary-fixed-variant": "#005321",
+                        "on-tertiary-container": "#003111",
+                        "surface-container": "#1c2026",
+                        "primary-fixed-dim": "#adc6ff",
+                        "primary-fixed": "#d8e2ff",
+                        "secondary-fixed": "#d9e3f6",
+                        "on-secondary-fixed-variant": "#3d4756",
+                        "inverse-on-surface": "#2d3137",
+                        "on-primary-container": "#00285d",
+                        "surface": "#10141a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"],
+                        "mono": ["JetBrains Mono"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(53, 57, 64, 0.8);
+            backdrop-filter: blur(20px);
+            box-shadow: 0px 12px 32px rgba(0, 0, 0, 0.4);
+        }
+        .gradient-button {
+            background: linear-gradient(135deg, #adc6ff 0%, #4d8eff 100%);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary/30 min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<nav class="bg-[#10141a] text-[#adc6ff] font-['Inter'] tracking-tight flex justify-between items-center w-full px-6 py-4 fixed top-0 z-50">
+<div class="text-xl font-bold tracking-tighter text-[#adc6ff]">Kinetic Monolith</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-[#c2c6d6] hover:text-white transition-colors duration-200" href="#">Docs</a>
+<a class="text-[#c2c6d6] hover:text-white transition-colors duration-200" href="#">Security</a>
+<a class="text-[#c2c6d6] hover:text-white transition-colors duration-200" href="#">Changelog</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="px-4 py-2 text-[#adc6ff] font-semibold hover:text-white transition-colors duration-200">Support</button>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined cursor-pointer hover:text-white transition-colors">settings</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-white transition-colors">account_circle</span>
+</div>
+</div>
+</nav>
+<!-- Main Content Area: Room Join Canvas -->
+<main class="flex-grow flex items-center justify-center pt-24 pb-12 px-6 relative overflow-hidden">
+<!-- Abstract Background Detail -->
+<div class="absolute inset-0 z-0 pointer-events-none opacity-20">
+<div class="absolute top-1/4 -left-20 w-96 h-96 bg-primary rounded-full blur-[120px]"></div>
+<div class="absolute bottom-1/4 -right-20 w-96 h-96 bg-tertiary rounded-full blur-[120px]"></div>
+</div>
+<!-- The Join Card -->
+<div class="w-full max-w-[520px] glass-panel rounded-xl p-10 border border-outline-variant/15 relative z-10">
+<div class="text-center mb-10">
+<h1 class="text-4xl md:text-5xl font-black tracking-tighter text-on-surface mb-3 leading-tight">Enter Workspace</h1>
+<p class="text-on-surface-variant text-sm font-medium leading-relaxed max-w-sm mx-auto">
+                    Paste a room ID or workspace link to start collaborating in real-time.
+                </p>
+</div>
+<!-- Interaction Form -->
+<div class="space-y-8">
+<div class="space-y-2">
+<label class="text-[10px] uppercase tracking-[0.2em] font-bold text-on-surface-variant/70 pl-1">Room Identifier</label>
+<div class="relative group">
+<input class="w-full bg-surface-container-highest border-none rounded-md px-5 py-4 font-mono text-lg text-primary placeholder:text-outline/40 focus:ring-0 focus:outline-none transition-all duration-300" placeholder="ROOM-K3-J9-F1" type="text"/>
+<div class="absolute bottom-0 left-0 w-0 h-[2px] bg-primary group-focus-within:w-full transition-all duration-500 shadow-[0_4px_12px_rgba(173,198,255,0.4)]"></div>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<button class="gradient-button text-on-primary font-bold py-4 rounded-md transition-all duration-300 hover:scale-[1.02] active:opacity-80 flex items-center justify-center gap-2 group">
+<span>Join Room</span>
+<span class="material-symbols-outlined text-xl group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+<div class="text-center">
+<button class="text-primary hover:text-white text-sm font-semibold transition-colors duration-200">
+                            Create a New Workspace
+                        </button>
+</div>
+</div>
+</div>
+<!-- Presence Hint Section -->
+<div class="mt-12 pt-8 border-t border-outline-variant/10 flex flex-col items-center gap-4">
+<div class="flex -space-x-3">
+<img alt="User 1" class="w-10 h-10 rounded-full border-2 border-surface-bright object-cover" data-alt="portrait of a focused software developer in a dimly lit modern office space with neon accents" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAr30UMAI6-8whKdMiO-OGu_NLsNWvGJEke2yAa2TwO0Dzc6apqvLNtEqvmJ3UTiIra-6g5tsZ5ZJCDtlq44GSWPzpY7J8NCv0Q6A13gQgfeStzr4pd7tQ6uE__qBxrhr8iuX4EtzcPPNW-WvLqiLKclJHD9oCcAtzU8pC4csuCPueTvY7qWwDYq32lInU1imLhAuUXfWTAV0mjRdmYqSAqqgSSLdZgcMDHjHjIXnk4iIKBnBstvb6Lg0YqJjhoHZ3z-zDBfMvY4Ow"/>
+<img alt="User 2" class="w-10 h-10 rounded-full border-2 border-surface-bright object-cover" data-alt="smiling young man with glasses looking at a screen in a collaborative tech workspace" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDV7K2-k_82Pp4DxowMUBhbUgahSnufEIECRjBSsgF6ZVV6JPFhrkLVRm-HnB66MIaJfk2YS7qcfWk9j9hTnAfO_rPTdcCVIHDyVvlgUTIAg4qp9LU60TqbjrnF_2uDEGK75_F8g92oQwGlq_3jEH1M4ovsuc5moT33wxYHUcFMQnd2Jk3rBPZSbai4XDbibg4yaYP_4fP8wp-Mvj4yQU3JjrbSno6fbR6o727-GLtMXljwVOKG6GzFR1sgJkFynpgXSP8NMc8sl7s"/>
+<img alt="User 3" class="w-10 h-10 rounded-full border-2 border-surface-bright object-cover" data-alt="professional woman working in a high-tech software engineering environment with data visualization on monitors" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBB8TvxZfzBKqCYAx_wU6sB3nytn5ZFgvFAqIIMFShbdiZm6lq_5j7QEbVj0dJUEnlVuVPr8ENT7PhklUUNB97-pBud7lawhFTYxoid6ralHJxK6_qGOvNeNBaSdiD4mdI63bTcaFJx1dy_tnAK8h1KwygEVonH4b037OZG3RNNh13fCC4ysRz0zKGb9z-K5sFxjuDY3heBe9ZWlK3PkB2me3Zlt61WxcSbfKZCZualcZfISPt2g1AoWSn9yAwn7KRUwRunpzqRFDU"/>
+<div class="w-10 h-10 rounded-full border-2 border-surface-bright bg-surface-container-high flex items-center justify-center text-[10px] font-bold text-on-surface-variant">
+                        +5
+                    </div>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-tertiary animate-pulse shadow-[0_0_8px_rgba(74,225,118,0.6)]"></div>
+<span class="text-xs font-bold text-on-tertiary-fixed-variant tracking-wider uppercase">8 Others Online</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-[#10141a] border-t border-[#1c2026]/15 w-full py-8 px-6 flex flex-col md:flex-row justify-between items-center gap-4 z-10">
+<div class="text-[#adc6ff] font-black tracking-widest text-sm">KINETIC MONOLITH</div>
+<div class="text-[#c2c6d6] font-['Inter'] text-xs uppercase tracking-widest text-center">
+            © 2024 Kinetic Monolith. Engineered for flow.
+        </div>
+<div class="flex items-center gap-6">
+<a class="text-[#c2c6d6] hover:text-[#adc6ff] font-['Inter'] text-xs uppercase tracking-widest transition-colors duration-300" href="#">Terms</a>
+<a class="text-[#c2c6d6] hover:text-[#adc6ff] font-['Inter'] text-xs uppercase tracking-widest transition-colors duration-300" href="#">Privacy</a>
+<a class="text-[#c2c6d6] hover:text-[#adc6ff] font-['Inter'] text-xs uppercase tracking-widest transition-colors duration-300" href="#">Status</a>
+</div>
+</footer>
+</body></html>
