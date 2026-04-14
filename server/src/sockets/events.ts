@@ -1,38 +1,41 @@
 export const SOCKET_EVENTS = {
-    JOIN_ROOM: 'join-room',
-    ROOM_JOINED: 'room-joined',
-    USER_JOIN: 'user-join',
-    USER_LEAVE: 'user-leave',
+    JOIN_ROOM: "join-room",
+    ROOM_JOINED: "room-joined",
+    USER_JOIN: "user-join",
+    USER_LEAVE: "user-leave",
 
-    FOLDER_CREATE: 'folder-create',
-    FOLDER_CREATED: 'folder-created',
-    FOLDER_RENAME: 'folder-rename',
-    FOLDER_RENAMED: 'folder-renamed',
-    FOLDER_DELETE: 'folder-delete',
-    FOLDER_DELETED: 'folder-deleted',
+    FOLDER_CREATE: "folder-create",
+    FOLDER_CREATED: "folder-created",
+    FOLDER_RENAME: "folder-rename",
+    FOLDER_RENAMED: "folder-renamed",
+    FOLDER_DELETE: "folder-delete",
+    FOLDER_DELETED: "folder-deleted",
 
-    FILE_CREATE: 'file-create',
-    FILE_CREATED: 'file-created',
-    FILE_RENAME: 'file-rename',
-    FILE_RENAMED: 'file-renamed',
-    FILE_DELETE: 'file-delete',
-    FILE_DELETED: 'file-deleted',
+    FILE_CREATE: "file-create",
+    FILE_CREATED: "file-created",
+    FILE_RENAME: "file-rename",
+    FILE_RENAMED: "file-renamed",
+    FILE_DELETE: "file-delete",
+    FILE_DELETED: "file-deleted",
 
-    CODE_CHANGE: 'code-change',
-    CODE_UPDATE: 'code-update',
+    CODE_CHANGE: "code-change",
+    CODE_UPDATE: "code-update",
 
-    ACTIVE_FILE: 'active-file',
-    ACTIVE_FILE_UPDATE: 'active-file-update',
+    ACTIVE_FILE: "active-file",
+    ACTIVE_FILE_UPDATE: "active-file-update",
 
-    CURSOR_MOVE: 'cursor-move',
+    CURSOR_MOVE: "cursor-move",
 
-    CHAT_SEND: 'chat-send',
-    CHAT_MESSAGE: 'chat-message',
-    CHAT_HISTORY: 'chat-history',
+    YJS_UPDATE: "yjs-update",
+    YJS_AWARENESS: "yjs-awareness",
 
-    CODE_RUN: 'code-run',
-    CODE_EXECUTION_START: 'code-execution-start',
-    CODE_EXECUTION_RESULT: 'code-execution-result',
+    CHAT_SEND: "chat-send",
+    CHAT_MESSAGE: "chat-message",
+    CHAT_HISTORY: "chat-history",
+
+    CODE_RUN: "code-run",
+    CODE_EXECUTION_START: "code-execution-start",
+    CODE_EXECUTION_RESULT: "code-execution-result",
 } as const;
 
 export type SocketEvent = (typeof SOCKET_EVENTS)[keyof typeof SOCKET_EVENTS];
@@ -42,7 +45,6 @@ export type User = {
     name: string;
     color?: string;
 };
-
 
 export type JoinRoomPayload = {
     roomId: string;
@@ -57,8 +59,8 @@ export type RoomJoinedPayload = {
     code: string;
     version: number;
     users: User[];
+    yjsState: Buffer;
 };
-
 
 export type FolderCreatePayload = {
     roomId: string;
@@ -97,7 +99,6 @@ export type FolderDeletedPayload = {
     version: number;
 };
 
-
 export type FileCreatePayload = {
     roomId: string;
     path: string;
@@ -132,7 +133,6 @@ export type FileDeletedPayload = {
     path: string;
     version: number;
 };
-
 
 export type CodeChangePayload = {
     roomId: string;
@@ -202,5 +202,3 @@ export type CodeExecutionResultPayload = {
     language: string;
     version: string;
 };
-
-

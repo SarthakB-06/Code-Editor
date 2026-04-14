@@ -1,7 +1,16 @@
-import type { User } from './events.js';
-import { getOrCreateRoomFs, type RoomFs } from '../modules/room/roomFs.service.js';
+import type { User } from "./events.js";
+import * as Y from "yjs";
+import {
+  getOrCreateRoomFs,
+  type RoomFs,
+} from "../modules/room/roomFs.service.js";
 
-export type RoomFsState = { folders: Set<string>; files: Map<string, string>; version: number };
+export type RoomFsState = {
+  folders: Set<string>;
+  files: Map<string, string>;
+  version: number;
+  ydoc: Y.Doc;
+};
 
 export const roomState = new Map<string, RoomFsState>();
 export const roomUsers = new Map<string, Map<string, User>>();
@@ -10,7 +19,8 @@ const loadedRooms = new Set<string>();
 const loadPromises = new Map<string, Promise<void>>();
 
 export const ensureRoom = (roomId: string) => {
-  if (!roomState.has(roomId)) roomState.set(roomId, { folders: new Set(), files: new Map(), version: 0 });
+  if (!roomState.has(roomId))
+    roomState.set(roomId, { folders: new Set(), files: new Map(), version: 0, ydoc: new Y.Doc() });
   if (!roomUsers.has(roomId)) roomUsers.set(roomId, new Map());
 };
 
@@ -28,11 +38,14 @@ export const ensureRoomLoaded = async (roomId: string) => {
     for (const folder of fs.folders ?? []) folders.add(folder);
 
     const files = new Map<string, string>();
+    const ydoc = new Y.Doc();
     for (const f of fs.files) {
       files.set(f.path, f.content);
+      const text = ydoc.getText(f.path);
+      text.insert(0, f.content);
     }
 
-    roomState.set(roomId, { folders, files, version: fs.version });
+    roomState.set(roomId, { folders, files, version: fs.version, ydoc });
     loadedRooms.add(roomId);
   };
 
@@ -64,17 +77,17 @@ export const getFileList = (roomId: string): { path: string }[] => {
 
 export const getFileContent = (roomId: string, path: string): string => {
   const state = roomState.get(roomId);
-  if (!state) return '';
-  return state.files.get(path) ?? '';
+  if (!state) return "";
+  return state.files.get(path) ?? "";
 };
 
 export const getDefaultActivePath = (roomId: string): string => {
   const state = roomState.get(roomId);
-  if (!state) return 'main.ts';
+  if (!state) return "main.ts";
 
   const paths = Array.from(state.files.keys());
   paths.sort((a, b) => a.localeCompare(b));
-  return paths[0] ?? 'main.ts';
+  return paths[0] ?? "main.ts";
 };
 
 export const toRoomFsSnapshot = (roomId: string): RoomFs => {

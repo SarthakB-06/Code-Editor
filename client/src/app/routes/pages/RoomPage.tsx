@@ -2,6 +2,9 @@ import Editor from '@monaco-editor/react';
 import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import type * as Monaco from 'monaco-editor';
+import * as Y from "yjs";
+import { MonacoBinding } from "y-monaco";
+import { SocketIoProvider } from "../../../features/editor/SocketIoProvider";
 
 import { getSocket } from '../../../features/collaboration/socketService';
 
@@ -158,6 +161,8 @@ const RoomPage = () => {
 
   const editorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<typeof Monaco | null>(null);
+  const providerRef = useRef<SocketIoProvider | null>(null);
+  const bindingRef = useRef<MonacoBinding | null>(null);
   const cursorListenerRef = useRef<Monaco.IDisposable | null>(null);
   const cursorEmitTimerRef = useRef<number | null>(null);
   const lastCursorRef = useRef<Cursor | null>(null);
@@ -179,6 +184,13 @@ const RoomPage = () => {
 
   useEffect(() => {
     activePathRef.current = activePath;
+    if (providerRef.current && editorRef.current) {
+      if (bindingRef.current) { bindingRef.current.destroy(); bindingRef.current = null; }
+      const model = editorRef.current.getModel();
+      if (model) {
+        bindingRef.current = new MonacoBinding(providerRef.current.doc.getText(activePath), model, new Set([editorRef.current]), providerRef.current.awareness);
+      }
+    }
   }, [activePath]);
 
   useEffect(() => {
@@ -238,26 +250,6 @@ const RoomPage = () => {
     setRenameFolderToPath(path);
   };
 
-  const handleEditorChange = (value: string | undefined) => {
-    const next = value ?? '';
-    setCode(next);
-
-    if (!roomId) return;
-    if (!activePath) return;
-    if (applyingRemoteRef.current) {
-      applyingRemoteRef.current = false;
-      return;
-    }
-
-    setFileContent(activePath, next);
-
-    const socket = getSocket();
-
-    if (emitTimerRef.current) window.clearTimeout(emitTimerRef.current);
-    emitTimerRef.current = window.setTimeout(() => {
-      socket.emit('code-change', { roomId, path: activePath, code: next });
-    }, 150);
-  };
 
   const getCursorColorIndex = (userId: string) => {
     let hash = 0;
@@ -446,11 +438,12 @@ const RoomPage = () => {
     try {
       socket = getSocket();
     } catch (err) {
-      setSocketError(err instanceof Error ? err.message : 'Socket error');
+      const msg = err instanceof Error ? err.message : "Socket error";
+      queueMicrotask(() => setSocketError(msg));
       return;
     }
 
-    setSocketError(null);
+    queueMicrotask(() => setSocketError(null));
     socket.emit('join-room', { roomId });
     socket.emit('get-chat-history', { roomId });
 
@@ -480,8 +473,28 @@ const RoomPage = () => {
       for (const f of payload.files ?? []) {
         const p = f.path;
         paths.push(p);
-        fileContentsRef.current.set(p, f.content ?? '');
+        fileContentsRef.current.set(p, f.content ?? "");
       }
+
+      const doc = new Y.Doc();
+      const payloadyjs = payload as unknown as { yjsState?: Buffer };
+      if (payloadyjs.yjsState) {
+        Y.applyUpdate(doc, new Uint8Array(payloadyjs.yjsState));
+      }
+
+      if (providerRef.current) providerRef.current.destroy();
+
+      const rootSocket = getSocket();
+      providerRef.current = new SocketIoProvider(rootSocket as unknown as typeof SocketIoProvider.prototype.socket, roomId, doc);
+
+      const me = payload.users.find(u => u.id === rootSocket.id);
+      if (me) {
+        providerRef.current.awareness.setLocalStateField('user', {
+          name: me.name,
+          color: getCursorColorIndex(me.id).toString()
+        });
+      }
+
 
       const folderList: string[] = [];
       for (const f of payload.folders ?? []) folderList.push(f.path);
@@ -823,6 +836,8 @@ const RoomPage = () => {
         window.cancelAnimationFrame(applyRemoteCursorsRafRef.current);
         applyRemoteCursorsRafRef.current = null;
       }
+      if (bindingRef.current) { bindingRef.current.destroy(); bindingRef.current = null; }
+      if (providerRef.current) { providerRef.current.destroy(); providerRef.current = null; }
     };
   }, [roomId]);
 
@@ -961,7 +976,7 @@ const RoomPage = () => {
               theme="vs-dark"
               defaultLanguage="typescript"
               value={code}
-              onChange={handleEditorChange}
+              onChange={() => {/* y-monaco handles code sync directly */ }}
               onMount={handleEditorMount}
               options={{ minimap: { enabled: false } }}
             />

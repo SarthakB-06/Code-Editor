@@ -1,5 +1,10 @@
-import type { Server, Socket } from 'socket.io';
-import { SOCKET_EVENTS, type ActiveFilePayload, type CursorMovePayload, type User } from './events.js';
+import type { Server, Socket } from "socket.io";
+import {
+  SOCKET_EVENTS,
+  type ActiveFilePayload,
+  type CursorMovePayload,
+  type User,
+} from "./events.js";
 
 type SocketData = {
   user?: User;
@@ -10,19 +15,19 @@ export const registerPresenceHandlers = (io: Server) => {
     const s = socket as Socket & { data: SocketData };
 
     const emitError = (message: string) => {
-      socket.emit('error', { message });
+      socket.emit("error", { message });
     };
 
     const onActiveFile = (payload: ActiveFilePayload) => {
       const user = s.data.user;
       if (!user) {
-        emitError('UNAUTHORIZED');
+        emitError("UNAUTHORIZED");
         return;
       }
 
       const { roomId, path } = payload;
       if (!roomId || !path) {
-        emitError('INVALID_PAYLOAD');
+        emitError("INVALID_PAYLOAD");
         return;
       }
 
@@ -36,13 +41,13 @@ export const registerPresenceHandlers = (io: Server) => {
     const onCursorMove = (payload: CursorMovePayload) => {
       const user = s.data.user;
       if (!user) {
-        emitError('UNAUTHORIZED');
+        emitError("UNAUTHORIZED");
         return;
       }
 
       const { roomId, path, cursor } = payload;
       if (!roomId || !path) {
-        emitError('INVALID_PAYLOAD');
+        emitError("INVALID_PAYLOAD");
         return;
       }
 
@@ -59,5 +64,5 @@ export const registerPresenceHandlers = (io: Server) => {
     socket.on(SOCKET_EVENTS.CURSOR_MOVE, onCursorMove);
   };
 
-  io.on('connection', onConnection);
+  io.on("connection", onConnection);
 };
