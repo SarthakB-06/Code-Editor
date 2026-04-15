@@ -8,8 +8,13 @@ import { connectDb } from "./config/db.js";
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "https://codesync-theta-ten.vercel.app/", // In production, restrict this to your client's domain
-    methods: ["GET", "POST"],
+    origin: [
+      "https://codesync-theta-ten.vercel.app",
+      "http://localhost:5173",
+      "http://127.0.0.1:5173"
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true
   },
 });
 
