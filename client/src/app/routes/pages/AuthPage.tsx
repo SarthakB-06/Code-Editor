@@ -52,13 +52,13 @@ const AuthPage = () => {
           <div className="flex flex-col items-center mb-10">
             <div className="mb-6 flex items-center justify-center">
               <span className="text-3xl font-black tracking-tighter text-primary">
-                Monolith_IDE
+                CodeSync
               </span>
             </div>
             <h1 className="text-2xl font-bold text-on-surface tracking-tight text-center">
               {mode === "login"
-                ? "Sign in to MonolithCode"
-                : "Sign up for MonolithCode"}
+                ? "Sign in to CodeSync"
+                : "Sign up for CodeSync"}
             </h1>
             <p className="text-on-surface-variant text-sm mt-2 font-label">
               The high-performance workspace for elite developers.

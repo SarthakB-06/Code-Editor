@@ -78,6 +78,13 @@ export const getFileList = (roomId: string): { path: string }[] => {
 export const getFileContent = (roomId: string, path: string): string => {
   const state = roomState.get(roomId);
   if (!state) return "";
+
+  // The Yjs Document is the true source of truth for all live user edits.
+  const yjsText = state.ydoc.getText(path).toString();
+  if (yjsText) {
+    return yjsText;
+  }
+
   return state.files.get(path) ?? "";
 };
 
@@ -102,9 +109,14 @@ export const toRoomFsSnapshot = (roomId: string): RoomFs => {
 
   const files: { path: string; content: string }[] = [];
   if (state) {
-    const entries = Array.from(state.files.entries());
-    entries.sort((a, b) => a[0].localeCompare(b[0]));
-    for (const [path, content] of entries) files.push({ path, content });
+    const paths = Array.from(state.files.keys()).filter(p => p !== "room-level");
+    paths.sort((a, b) => a.localeCompare(b));
+
+    for (const path of paths) {
+      const ycontent = state.ydoc.getText(path).toString();
+      const content = ycontent || state.files.get(path) || "";
+      files.push({ path, content });
+    }
   }
 
   return {

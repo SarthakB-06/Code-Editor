@@ -1,4 +1,6 @@
-import Editor from '@monaco-editor/react';
+const fs = require('fs');
+
+const original = `import Editor from '@monaco-editor/react';
 import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import type * as Monaco from 'monaco-editor';
@@ -56,10 +58,10 @@ const buildTreeFromEntries = (folders: string[], files: string[]): TreeNode[] =>
   const normalize = (p: string) => {
     return p
       .trim()
-      .replace(/\\/g, '/')
-      .replace(/\/+/g, '/')
-      .replace(/^\/+/, '')
-      .replace(/\/+$/, '');
+      .replace(/\\\\\\\\/g, '/')
+      .replace(/\\\\/+/g, '/')
+      .replace(/^\\\\/+/, '')
+      .replace(/\\\\/+$/, '');
   };
 
   const addFolderPath = (folderPath: string) => {
@@ -103,12 +105,12 @@ const buildTreeFromEntries = (folders: string[], files: string[]): TreeNode[] =>
     folderNames.sort((a, b) => a.localeCompare(b));
 
     for (const name of folderNames) {
-      const nextPrefix = prefix ? `${prefix}/${name}` : name;
+      const nextPrefix = prefix ? \\\`\\\\\${prefix}/\\\\\\${name}\\\` : name;
       const child = folder.folders.get(name)!;
       nodes.push({
         type: 'folder',
         name,
-        key: `folder:${nextPrefix}`,
+        key: \\\`folder:\\\\\${nextPrefix}\\\`,
         children: folderToNodes(child, nextPrefix),
       });
     }
@@ -117,8 +119,8 @@ const buildTreeFromEntries = (folders: string[], files: string[]): TreeNode[] =>
     fileNames.sort((a, b) => a.localeCompare(b));
 
     for (const name of fileNames) {
-      const path = prefix ? `${prefix}/${name}` : name;
-      nodes.push({ type: 'file', name, key: `file:${path}`, path });
+      const path = prefix ? \\\`\\\\\${prefix}/\\\\\\${name}\\\` : name;
+      nodes.push({ type: 'file', name, key: \\\`file:\\\\\${path}\\\`, path });
     }
 
     return nodes;
@@ -129,7 +131,7 @@ const buildTreeFromEntries = (folders: string[], files: string[]): TreeNode[] =>
 
 const RoomPage = () => {
   const { roomId } = useParams();
-  const [code, setCode] = useState('// Start coding...\n');
+  const [code, setCode] = useState('// Start coding...\\n');
   const [users, setUsers] = useState<User[]>([]);
   const [version, setVersion] = useState(0);
   const [socketError, setSocketError] = useState<string | null>(null);
@@ -174,7 +176,6 @@ const RoomPage = () => {
   const applyingRemoteRef = useRef(false);
   const emitTimerRef = useRef<number | null>(null);
 
-  // OMIT YJS AWARENESS TO USE CUSTOM CURSORS
   const bindMonacoToYjs = (path: string, provider: SocketIoProvider | null, editor: Monaco.editor.IStandaloneCodeEditor | null) => {
     if (!provider || !editor) return;
     if (bindingRef.current) { bindingRef.current.destroy(); bindingRef.current = null; }
@@ -215,12 +216,12 @@ const RoomPage = () => {
 
   const shareLink = useMemo(() => {
     if (!roomId) return '';
-    return `${window.location.origin}/room/${roomId}`;
+    return \\\`\\\\\${window.location.origin}/room/\\\\\${roomId}\\\`;
   }, [roomId]);
 
   const handleRunCode = () => {
     if (!roomId || !activePath) return;
-    setTerminalOutput('Starting execution...\n');
+    setTerminalOutput('Starting execution...\\n');
     setIsTerminalOpen('running');
     const socket = getSocket();
     socket.emit('code-run', { roomId, entryPath: activePath });
@@ -302,7 +303,7 @@ const RoomPage = () => {
           decos.push({
             range: new monaco.Range(startLineNumber, startColumn, endLineNumber, endColumn),
             options: {
-              className: `remote-selection-${idx}`,
+              className: \\\`remote-selection-\\\\\${idx}\\\`,
               stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
             },
           });
@@ -313,7 +314,7 @@ const RoomPage = () => {
         range: new monaco.Range(entry.cursor.lineNumber, entry.cursor.column, entry.cursor.lineNumber, entry.cursor.column),
         options: {
           stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-          beforeContentClassName: `remote-cursor remote-cursor-${idx}`,
+          beforeContentClassName: \\\`remote-cursor remote-cursor-\\\\\${idx}\\\`,
           hoverMessage: { value: entry.user.name },
         },
       });
@@ -343,6 +344,8 @@ const RoomPage = () => {
     editorRef.current = editor;
     monacoRef.current = monaco;
 
+    bindMonacoToYjs(activePathRef.current, providerRef.current, editor);
+
     cursorListenerRef.current?.dispose();
     cursorListenerRef.current = editor.onDidChangeCursorSelection((e) => {
       const position = e.selection.getPosition();
@@ -361,8 +364,6 @@ const RoomPage = () => {
       };
 
       if (cursorEmitTimerRef.current != null) return;
-
-      // OPTIMIZED - 15ms debounce instead of 60ms to greatly reduce lag
       cursorEmitTimerRef.current = window.setTimeout(() => {
         cursorEmitTimerRef.current = null;
         const cursor = lastCursorRef.current;
@@ -374,7 +375,6 @@ const RoomPage = () => {
       }, 15);
     });
 
-    bindMonacoToYjs(activePathRef.current, providerRef.current, editor);
     scheduleApplyRemoteCursors();
   };
 
@@ -392,7 +392,7 @@ const RoomPage = () => {
     if (!roomId) return;
     const trimmed = newFilePath.trim();
     if (!trimmed) return;
-    const fullPath = selectedFolderPath ? `${selectedFolderPath}/${trimmed}` : trimmed;
+    const fullPath = selectedFolderPath ? \\\`\\\\\${selectedFolderPath}/\\\\\${trimmed}\\\` : trimmed;
     const socket = getSocket();
     socket.emit('file-create', { roomId, path: fullPath });
     setNewFilePath('');
@@ -402,7 +402,7 @@ const RoomPage = () => {
     if (!roomId) return;
     const trimmed = newFolderPath.trim();
     if (!trimmed) return;
-    const fullPath = selectedFolderPath ? `${selectedFolderPath}/${trimmed}` : trimmed;
+    const fullPath = selectedFolderPath ? \\\`\\\\\${selectedFolderPath}/\\\\\${trimmed}\\\` : trimmed;
     const socket = getSocket();
     socket.emit('folder-create', { roomId, path: fullPath });
     setNewFolderPath('');
@@ -500,6 +500,7 @@ const RoomPage = () => {
       }
 
       if (providerRef.current) providerRef.current.destroy();
+
       const rootSocket = getSocket();
       providerRef.current = new SocketIoProvider(rootSocket as unknown as typeof SocketIoProvider.prototype.socket, roomId, doc);
 
@@ -763,7 +764,7 @@ const RoomPage = () => {
     const onCodeExecutionStart = (payload: { roomId: string; entryPath: string; triggeredBy: string }) => {
       if (payload.roomId !== roomId) return;
       setIsTerminalOpen('running');
-      setTerminalOutput(`> Execution triggered by ${payload.triggeredBy} on ${payload.entryPath}...\n`);
+      setTerminalOutput(\\\`> Execution triggered by \\\\\${payload.triggeredBy} on \\\\\${payload.entryPath}...\\n\\\`);
     };
 
     const onCodeExecutionResult = (payload: {
@@ -776,18 +777,18 @@ const RoomPage = () => {
       if (payload.roomId !== roomId) return;
       setIsTerminalOpen('open');
 
-      let out = `--- Language: ${payload.language} (v${payload.version}) ---\n`;
+      let out = \\\`--- Language: \\\\\${payload.language} (v\\\\\${payload.version}) ---\\n\\\`;
       if (payload.compileStatus && payload.compileStatus.code !== 0) {
-        out += `\n[Compile Error - exited with ${payload.compileStatus.code}]\n${payload.compileStatus.stderr}\n`;
+        out += \\\`\\n[Compile Error - exited with \\\\\${payload.compileStatus.code}]\\n\\\\\${payload.compileStatus.stderr}\\n\\\`;
       } else {
         if (payload.runStatus.stdout) {
-          out += `\n[Output]\n${payload.runStatus.stdout}\n`;
+          out += \\\`\\n[Output]\\n\\\\\${payload.runStatus.stdout}\\n\\\`;
         }
         if (payload.runStatus.stderr) {
-          out += `\n[Error Output - exited with ${payload.runStatus.code}]\n${payload.runStatus.stderr}\n`;
+          out += \\\`\\n[Error Output - exited with \\\\\${payload.runStatus.code}]\\n\\\\\${payload.runStatus.stderr}\\n\\\`;
         }
         if (!payload.runStatus.stdout && !payload.runStatus.stderr) {
-          out += `\n[Program finished with exit code ${payload.runStatus.code} and no output]\n`;
+          out += \\\`\\n[Program finished with exit code \\\\\${payload.runStatus.code} and no output]\\n\\\`;
         }
       }
       setTerminalOutput(prev => prev + out);
@@ -865,7 +866,7 @@ const RoomPage = () => {
 
     for (const node of nodes) {
       if (node.type === 'folder') {
-        const isSelected = node.key === `folder:${selectedFolderPath}`;
+        const isSelected = node.key === \\\`folder:\\\\\${selectedFolderPath}\\\`;
         out.push(
           <div key={node.key}>
             <button
@@ -873,7 +874,7 @@ const RoomPage = () => {
               data-folder={node.key.replace(/^folder:/, '')}
               onClick={handleFolderSelectClick}
               style={{ paddingLeft: (depth * 12) + 8 }}
-              className={`flex items-center w-full text-left text-sm py-1.5 px-2 hover:bg-surface-variant/40 rounded transition-colors text-on-surface-variant ${isSelected ? 'bg-surface-variant/60 font-semibold' : 'font-medium'}`}
+              className={\\\`flex items-center w-full text-left text-sm py-1.5 px-2 hover:bg-surface-variant/40 rounded transition-colors text-on-surface-variant \\\\\${isSelected ? 'bg-surface-variant/60 font-semibold' : 'font-medium'}\\\`}
             >
               <span className="material-symbols-outlined text-sm mr-2 text-amber-500/80" style={{ fontVariationSettings: "'FILL' 1" }}>folder</span>
               {node.name}
@@ -890,7 +891,7 @@ const RoomPage = () => {
             data-path={node.path}
             onClick={handleFileSelectClick}
             style={{ paddingLeft: (depth * 12) + 8 }}
-            className={`flex items-center w-full text-left text-sm py-1.5 px-2 hover:bg-surface-variant/40 rounded transition-colors text-on-surface-variant ${isActive ? 'bg-primary/10 text-primary font-medium border-l-[3px] border-primary' : 'border-l-[3px] border-transparent'}`}
+            className={\\\`flex items-center w-full text-left text-sm py-1.5 px-2 hover:bg-surface-variant/40 rounded transition-colors text-on-surface-variant \\\\\${isActive ? 'bg-primary/10 text-primary font-medium border-l-[3px] border-primary' : 'border-l-[3px] border-transparent'}\\\`}
           >
             <span className="material-symbols-outlined text-sm mr-2 text-blue-400">description</span>
             {node.name}
@@ -1052,14 +1053,14 @@ const RoomPage = () => {
           <div className="flex border-b border-outline-variant/20 h-10 shrink-0">
             <button
               onClick={() => setActiveRightTab('presence')}
-              className={`flex-1 flex items-center justify-center gap-2 text-xs font-bold transition-colors ${activeRightTab === 'presence' ? 'text-primary border-b-2 border-primary' : 'text-on-surface-variant hover:bg-surface-variant/20'}`}
+              className={\\\`flex-1 flex items-center justify-center gap-2 text-xs font-bold transition-colors \\\\\${activeRightTab === 'presence' ? 'text-primary border-b-2 border-primary' : 'text-on-surface-variant hover:bg-surface-variant/20'}\\\`}
             >
               <span className="material-symbols-outlined text-lg">group</span>
               PRESENCE
             </button>
             <button
               onClick={() => setActiveRightTab('chat')}
-              className={`flex-1 flex items-center justify-center gap-2 text-xs font-bold transition-colors ${activeRightTab === 'chat' ? 'text-primary border-b-2 border-primary' : 'text-on-surface-variant hover:bg-surface-variant/20'}`}
+              className={\\\`flex-1 flex items-center justify-center gap-2 text-xs font-bold transition-colors \\\\\${activeRightTab === 'chat' ? 'text-primary border-b-2 border-primary' : 'text-on-surface-variant hover:bg-surface-variant/20'}\\\`}
             >
               <span className="material-symbols-outlined text-lg">chat</span>
               CHAT
@@ -1077,12 +1078,12 @@ const RoomPage = () => {
                   {users.map(u => (
                     <div key={u.id} className="flex items-center gap-3 p-2 rounded-lg bg-surface-container-high/50 border border-outline-variant/10 hover:border-outline-variant/30 transition-all cursor-pointer">
                       <div className="relative shrink-0">
-                        <div className={`w-10 h-10 rounded-full border-2 ${getAccentClasses(u.id).border} flex items-center justify-center bg-surface uppercase font-bold text-lg text-primary`}>{u.name[0]}</div>
-                        <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 ${getAccentClasses(u.id).dot} border-2 border-surface-container rounded-full animate-pulse`}></div>
+                        <div className={\\\`w-10 h-10 rounded-full border-2 \\\\\${getAccentClasses(u.id).border} flex items-center justify-center bg-surface uppercase font-bold text-lg text-primary\\\`}>{u.name[0]}</div>
+                        <div className={\\\`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 \\\\\${getAccentClasses(u.id).dot} border-2 border-surface-container rounded-full animate-pulse\\\`}></div>
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="text-sm font-bold text-on-surface truncate">{u.name}</div>
-                        <div className="text-[10px] text-on-surface-variant truncate">{activeFileByUserId[u.id] ? `Editing: ${activeFileByUserId[u.id]}` : 'Online'}</div>
+                        <div className="text-[10px] text-on-surface-variant truncate">{activeFileByUserId[u.id] ? \\\`Editing: \\\\\${activeFileByUserId[u.id]}\\\` : 'Online'}</div>
                       </div>
                     </div>
                   ))}
@@ -1142,3 +1143,7 @@ const RoomPage = () => {
 };
 
 export default RoomPage;
+`;
+
+fs.writeFileSync('d:/Code-Editor/client/src/app/routes/pages/RoomPage.tsx', original);
+console.log("Restored successfully.")

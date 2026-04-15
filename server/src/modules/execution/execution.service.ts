@@ -1,82 +1,126 @@
 import { getOrCreateRoomFs } from "../room/roomFs.service.js";
-import { promises as fs } from "fs";
-import path from "path";
-import os from "os";
-import { exec } from "child_process";
-import util from "util";
+import { getFileContent } from "../../sockets/state.js";
 
-const execAsync = util.promisify(exec);
-
-// Mapping extensions to local CLI commands
-const getCommand = (ext: string, filePath: string) => {
+// Hardcoded common language IDs for Judge0
+const getLanguageId = (ext: string) => {
   switch (ext) {
     case "js":
-      return `node "${filePath}"`;
+    case "javascript":
+      return 93; // Node.js
     case "ts":
-      return `tsx "${filePath}"`; // Switched from npx tsx to global tsx
+    case "typescript":
+      return 94; // TypeScript
     case "py":
-      return `python "${filePath}"`;
+    case "python":
+      return 71; // Python
+    case "java":
+      return 62; // Java
+    case "c":
+      return 50; // C
+    case "cpp":
+      return 54; // C++
+    case "go":
+      return 60; // Go
+    case "rs":
+    case "rust":
+      return 73; // Rust
     default:
-      return `echo "Local execution not configured for: .${ext}"`;
+      return null;
   }
 };
 
 export const executeRoomCode = async (roomId: string, entryPath: string) => {
   const roomFs = await getOrCreateRoomFs(roomId);
-  if (!roomFs || roomFs.files.length === 0) {
-    throw new Error("Room is empty or has no files.");
+
+  // Find the exact file to execute, prioritizing the in-memory state which has live unsaved changes
+  const liveContent = getFileContent(roomId, entryPath);
+  const dbFile = roomFs?.files.find((f) => f.path === entryPath);
+
+  const finalContent = liveContent || dbFile?.content;
+
+  if (typeof finalContent !== "string") {
+    throw new Error(`Entry file not found: ${entryPath}`);
   }
 
-  // Create an isolated temporary directory for the execution
-  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), `run-${roomId}-`));
+  const ext = entryPath.split(".").pop()?.toLowerCase() || "";
+  const languageId = getLanguageId(ext);
+
+  if (!languageId) {
+    return {
+      language: ext,
+      version: "unknown",
+      run: {
+        stdout: "",
+        stderr: `Execution not supported for file extension: .${ext}`,
+        code: 1,
+      },
+    };
+  }
+
+  // Use Judge0 via RapidAPI
+  const rapidApiKey = process.env.RAPIDAPI_KEY;
+  if (!rapidApiKey) {
+    return {
+      language: ext,
+      version: "judge0",
+      run: {
+        stdout: "",
+        stderr: "Server Configuration Error: Missing RAPIDAPI_KEY in .env.",
+        code: 1,
+      },
+    };
+  }
 
   try {
-    // Write all the room's files to the temp directory
-    for (const file of roomFs.files) {
-      const fullPath = path.join(tmpDir, file.path);
-      await fs.mkdir(path.dirname(fullPath), { recursive: true });
-      await fs.writeFile(fullPath, file.content, "utf8");
-    }
+    const encodedSource = Buffer.from(finalContent).toString("base64");
 
-    const ext = entryPath.split(".").pop() || "";
-    const entryFullPath = path.join(tmpDir, entryPath);
-    const cmd = getCommand(ext, entryFullPath);
-
-    try {
-      // Execute the command locally with a strict 5-second timeout
-      const { stdout, stderr } = await execAsync(cmd, {
-        cwd: tmpDir,
-        timeout: 5000,
-      });
-
-      return {
-        language: ext,
-        version: "local",
-        run: { stdout, stderr, code: 0 },
-      };
-    } catch (error: any) {
-      // Execution failed, timed out, or syntax error
-      return {
-        language: ext,
-        version: "local",
-        run: {
-          stdout: error.stdout || "",
-          stderr: error.stderr || error.message || "Execution error",
-          code: error.code || 1,
+    const response = await fetch(
+      "https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=true&wait=true",
+      {
+        method: "POST",
+        headers: {
+          "x-rapidapi-key": rapidApiKey,
+          "x-rapidapi-host": "judge0-ce.p.rapidapi.com",
+          "Content-Type": "application/json",
         },
-      };
+        body: JSON.stringify({
+          source_code: encodedSource,
+          language_id: languageId,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Judge0 API Error: ${response.status} - ${errorText}`);
     }
-  } finally {
-    // Wait a slight moment for processes to release locks on Windows
-    await new Promise((res) => setTimeout(res, 500));
-    // Always properly clean up the temporary sandbox directory, ignoring lock errors
-    await fs
-      .rm(tmpDir, {
-        recursive: true,
-        force: true,
-        maxRetries: 3,
-        retryDelay: 500,
-      })
-      .catch(console.error);
+
+    const data = await response.json();
+
+    // Decode base64 outputs back to strings
+    const stdout = data.stdout ? Buffer.from(data.stdout, "base64").toString("utf-8") : "";
+    const stderr = data.stderr ? Buffer.from(data.stderr, "base64").toString("utf-8") : "";
+    const compileOutput = data.compile_output ? Buffer.from(data.compile_output, "base64").toString("utf-8") : "";
+
+    return {
+      language: ext,
+      version: "rapidapi.judge0",
+      run: {
+        stdout: stdout,
+        stderr: stderr || compileOutput || (data.status?.id !== 3 ? data.status?.description : ""),
+        code: data.status?.id === 3 ? 0 : 1, // Status 3 = Accepted
+      },
+    };
+  } catch (error: any) {
+    console.error("[Execution Service] RapidAPI Error:", error);
+    return {
+      language: ext,
+      version: "rapidapi.judge0",
+      run: {
+        stdout: "",
+        stderr: error.message || "An unknown error occurred during execution.",
+        code: 1,
+      },
+    };
   }
 };

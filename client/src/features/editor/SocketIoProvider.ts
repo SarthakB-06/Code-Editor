@@ -1,6 +1,6 @@
 import * as Y from "yjs";
 import { Socket } from "socket.io-client";
-import { Awareness } from "y-protocols/awareness";
+import { Awareness, encodeAwarenessUpdate, applyAwarenessUpdate } from "y-protocols/awareness";
 
 export class SocketIoProvider {
     doc: Y.Doc;
@@ -32,12 +32,10 @@ export class SocketIoProvider {
 
     private onAwarenessUpdate = ({ added, updated, removed }: { added: number[], updated: number[], removed: number[] }, origin: unknown) => {
         if (origin !== this) {
-            import("y-protocols/awareness").then(({ encodeAwarenessUpdate }) => {
-                const encoded = encodeAwarenessUpdate(this.awareness, [...added, ...updated, ...removed]);
-                this.socket.emit("yjs-awareness", {
-                    roomId: this.roomId,
-                    update: encoded,
-                });
+            const encoded = encodeAwarenessUpdate(this.awareness, [...added, ...updated, ...removed]);
+            this.socket.emit("yjs-awareness", {
+                roomId: this.roomId,
+                update: encoded,
             });
         }
     };
@@ -48,9 +46,8 @@ export class SocketIoProvider {
         }
     };
 
-    private onSocketAwareness = async (payload: { roomId: string; update: ArrayBuffer }) => {
+    private onSocketAwareness = (payload: { roomId: string; update: ArrayBuffer }) => {
         if (payload.roomId === this.roomId) {
-            const { applyAwarenessUpdate } = await import("y-protocols/awareness");
             applyAwarenessUpdate(this.awareness, new Uint8Array(payload.update), this);
         }
     };

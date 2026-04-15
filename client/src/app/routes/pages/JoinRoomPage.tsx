@@ -20,7 +20,7 @@ const JoinRoomPage = () => {
       {/* TopNavBar */}
       <nav className="bg-surface-container font-['Inter'] tracking-tight flex justify-between items-center w-full px-6 py-4 fixed top-0 z-50 border-b border-outline-variant/20">
         <div className="text-xl font-bold tracking-tighter text-primary">
-          Kinetic Monolith
+          CodeSync
         </div>
         <div className="flex items-center gap-4">
           <button
@@ -105,10 +105,10 @@ const JoinRoomPage = () => {
       {/* Footer */}
       <footer className="bg-surface border-t border-outline-variant/15 w-full py-6 px-6 flex flex-col md:flex-row justify-between items-center gap-4 z-10 mt-auto">
         <div className="text-primary font-black tracking-widest text-sm uppercase">
-          Kinetic Monolith
+          CodeSync
         </div>
         <div className="text-on-surface-variant font-['Inter'] text-xs uppercase tracking-widest text-center">
-          © 2026 Kinetic Monolith. Engineered for flow.
+          © 2026 CodeSync. Engineered for flow.
         </div>
         <div className="flex items-center gap-6">
           <span className="text-on-surface-variant text-xs uppercase tracking-widest">
