@@ -5,7 +5,7 @@ import authRouter from "./modules/auth/auth.routes.js";
 
 const app = express();
 
-app.use(cors());
+app.use(cors({origin: "https://codesync-theta-ten.vercel.app/"}));
 app.use(express.json());
 
 app.get("/", (req, res) => {
