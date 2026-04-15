@@ -494,7 +494,7 @@ const RoomPage = () => {
       }
 
       const doc = new Y.Doc();
-      const payloadyjs = payload as unknown as { yjsState?: Buffer };
+      const payloadyjs = payload as unknown as { yjsState?: ArrayBuffer | Uint8Array };
       if (payloadyjs.yjsState) {
         Y.applyUpdate(doc, new Uint8Array(payloadyjs.yjsState));
       }
